@@ -2,7 +2,8 @@ Class {
 	#name : #CCodeGeneratorInlineStrategy,
 	#superclass : #Object,
 	#instVars : [
-		'codeGenerator'
+		'codeGenerator',
+		'inlineFlagOrSymbol'
 	],
 	#category : #'Slang-CodeGeneration'
 }
@@ -26,7 +27,7 @@ CCodeGeneratorInlineStrategy class >> asSpecifiedOrQuick [
 ]
 
 { #category : #'instance creation' }
-CCodeGeneratorInlineStrategy class >> from: anObject [
+CCodeGeneratorInlineStrategy class >> basicFrom: anObject [
 	
 	"The argument is either a boolean or a sumbol.
 	If a boolean, it indicates if we need to inline or not.
@@ -41,6 +42,20 @@ CCodeGeneratorInlineStrategy class >> from: anObject [
 
 	"If the object is a selector use a perform to instantiate it."
 	^ self perform: anObject
+]
+
+{ #category : #'instance creation' }
+CCodeGeneratorInlineStrategy class >> from: anObject [
+
+	"The argument is either a boolean or a sumbol.
+	If a boolean, it indicates if we need to inline or not.
+	If == #asSpecified only inline methods marked with <inline: true>.
+	If == #asSpecifiedOrQuick only inline methods marked with <inline: true> or methods that are quick (^constant, ^inst var)."
+
+	| inlineStrategy |
+	inlineStrategy := self basicFrom: anObject.
+	inlineStrategy inliningStrategy: anObject.
+	^ inlineStrategy
 ]
 
 { #category : #'instance-crea' }
@@ -71,6 +86,18 @@ CCodeGeneratorInlineStrategy >> hasUnrenamableCCode: aTMethod [
 
 	^ (codeGenerator isSpecialSelector: aTMethod selector)
 		or: [ aTMethod hasUnrenamableCCode ]
+]
+
+{ #category : #accessing }
+CCodeGeneratorInlineStrategy >> inlineFlagOrSymbol [
+
+	^ inlineFlagOrSymbol
+]
+
+{ #category : #accessing }
+CCodeGeneratorInlineStrategy >> inlineFlagOrSymbol: anObject [
+
+	inlineFlagOrSymbol := anObject
 ]
 
 { #category : #testing }

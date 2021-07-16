@@ -43,3 +43,9 @@ CCodeGeneratorInlineAsSpecifiedStrategy >> shouldNotInlineSelector: aSelector [
 	
 	^ selectorsOfMethodsNotToInline includesKey: aSelector
 ]
+
+{ #category : #'all checks' }
+CCodeGeneratorInlineAsSpecifiedStrategy >> transformations [
+
+	^ { SLInterpreterLoopCaseInlining new localizingVars: #(). SLInlining new inliningStrategy: inlineFlagOrSymbol. SLUnreachableMethodElimination new}
+]

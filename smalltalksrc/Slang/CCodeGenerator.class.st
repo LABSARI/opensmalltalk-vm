@@ -794,17 +794,17 @@ CCodeGenerator >> collectInlineList: strategy [
 						at: node selector
 						ifPresent: [:senderCount| callsOf at: node selector put: senderCount + 1 ] ] ].
 
-		inlineStrategy validateCanInline: m.
-		(inlineStrategy canInline: m)
-			ifFalse: [ selectorsOfMethodsNotToInline add: m selector ]
-			ifTrue: [
-				(inlineStrategy shouldInlineMethod: m)
-					ifTrue: [ 
-						"inline if method has no C code and is either small or contains inline directive"
-						inlineList add: m selector]
-					ifFalse: [
-						inlineStrategy isSelectiveInlineStrategy
-							ifTrue: [selectorsOfMethodsNotToInline add: m selector] ] ] ].
+			inlineStrategy validateCanInline: m.
+			(inlineStrategy canInline: m)
+				ifFalse: [ selectorsOfMethodsNotToInline add: m selector ]
+				ifTrue: [
+					(inlineStrategy shouldInlineMethod: m)
+						ifTrue: [ 
+							"inline if method has no C code and is either small or contains inline directive"
+							inlineList add: m selector]
+						ifFalse: [
+							inlineStrategy isSelectiveInlineStrategy
+								ifTrue: [selectorsOfMethodsNotToInline add: m selector] ] ] ].
 
 	inlineStrategy isSelectiveInlineStrategy
 		ifTrue:
@@ -933,7 +933,10 @@ CCodeGenerator >> defineAtCompileTime: aString [
 { #category : #inlining }
 CCodeGenerator >> doBasicInlining: inlineFlagOrSymbol [
 	"Inline the bodies of all methods that are suitable for inlining.
-	This method does only the basic inlining suitable for both the core VM and plugins - no bytecode inlining etc"
+	This method does only the basic inlining suitable for both the core VM and plugins - no bytecode inlining etc.
+	
+	Fixed point algorithm. Iterate all methods until no more inlining is needed.
+	Inlining is done in a breadth first style. Ideally each iteration cuts the entire work by two."
 
 	| pass progress |
 	self collectInlineList: inlineFlagOrSymbol.

@@ -1353,10 +1353,10 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 	 otherwise the assignee variable type must match the return type of the inlinee.  Return
 	 types are not propagated."
 
-	| sel meth methArgs exitLabel inlineStmts label exitType elidedArgs |
+	| sel methodToInline methArgs exitLabel inlineStmts label exitType elidedArgs |
 	sel := aSendNode selector.
-	meth := aCodeGen methodNamed: sel.
-	methArgs := meth args.
+	methodToInline := aCodeGen methodNamed: sel.
+	methArgs := methodToInline args.
 	"convenient for debugging..."
 	aCodeGen maybeBreakForInlineOf: aSendNode in: self.
 	elidedArgs := #().
@@ -1364,61 +1364,69 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 		ifTrue: "If the first arg is not used we can and should elide it."
 			[| varNode |
 			 varNode := TVariableNode new setName: methArgs first.
-			 (meth parseTree noneSatisfy: [:node| varNode isSameAs: node]) ifTrue:
+			 (methodToInline parseTree noneSatisfy: [:node| varNode isSameAs: node]) ifTrue:
 				[elidedArgs := {methArgs first}].
 			 methArgs := methArgs allButFirst].
 	methArgs size = aSendNode args size ifFalse:
 		[^nil].
-	meth := meth copy.
+	methodToInline := methodToInline copy.
 
-	(meth statements size > 1
-	 and: [meth statements first isSend
-	 and: [meth statements first selector == #flag:]]) ifTrue:
-		[meth statements removeFirst].
+	(methodToInline statements size > 1
+	 and: [methodToInline statements first isSend
+	 and: [methodToInline statements first selector == #flag:]]) ifTrue:
+		[methodToInline statements removeFirst].
 
 	"Propagate the return type of an inlined method"
 	(directReturn or: [exitVar notNil]) ifTrue:
 		[exitType := directReturn 
 						ifTrue: [returnType] 
 						ifFalse: [(self typeFor: exitVar in: aCodeGen) ifNil: [#sqInt]].
-		(exitType = #void or: [exitType = meth returnType]) ifFalse:
-			[meth propagateReturnIn: aCodeGen]].
+		(exitType = #void or: [exitType = methodToInline returnType]) ifFalse:
+			[methodToInline propagateReturnIn: aCodeGen]].
 
 	"Propagate any unusual argument types to untyped argument variables"
 	methArgs
 		with: aSendNode args
 		do: [:formal :actual|
-			(meth declarationAt: formal ifAbsent: nil) ifNil:
+			(methodToInline declarationAt: formal ifAbsent: nil) ifNil:
 				[(self typeFor: actual in: aCodeGen) ifNotNil:
 					[:type|
 					type ~= #sqInt ifTrue:
-						[meth declarationAt: formal put: (type last = $* ifTrue: [type, formal] ifFalse: [type, ' ', formal])]]]].
+						[methodToInline declarationAt: formal put: (type last = $* ifTrue: [type, formal] ifFalse: [type, ' ', formal])]]]].
 
-	meth renameVarsForInliningInto: self except: elidedArgs in: aCodeGen.
-	meth renameLabelsForInliningInto: self.
-	self addVarsDeclarationsAndLabelsOf: meth except: elidedArgs.
-	meth hasReturn ifTrue:
+	methodToInline renameVarsForInliningInto: self except: elidedArgs in: aCodeGen.
+	methodToInline renameLabelsForInliningInto: self.
+	self addVarsDeclarationsAndLabelsOf: methodToInline except: elidedArgs.
+	methodToInline hasReturn ifTrue:
 		[directReturn ifFalse:
 			[exitLabel := self unusedLabelForInliningInto: self.
-			 (meth exitVar: exitVar label: exitLabel) "is label used?"
+			 (methodToInline exitVar: exitVar label: exitLabel) "is label used?"
 				ifTrue: [ labels add: exitLabel ]
 				ifFalse: [ exitLabel := nil ]]].
-	(inlineStmts := OrderedCollection new: meth statements size + meth args size + 2)
+	(inlineStmts := OrderedCollection new: methodToInline statements size + methodToInline args size + 2)
 		add: (label := TLabeledCommentNode new setComment: 'begin ', sel);
-		addAll: (self argAssignmentsFor: meth send: aSendNode except: elidedArgs in: aCodeGen);
-		addAll: meth statements.  "method body"
+		addAll: (self argAssignmentsFor: methodToInline send: aSendNode except: elidedArgs in: aCodeGen);
+		addAll: methodToInline statements.  "method body"
+	
+	"If this statement has a return, we need to make sure there will be a return.
+	 If the method to inline already has a return but we care about the result, remove the return, it will be done by the caller.
+	 Otherwise, add a return nil to ensure we have a return."
 	directReturn ifTrue:
-		[meth endsWithReturn
+		[methodToInline endsWithReturn
 			ifTrue:
 				[exitVar ifNotNil: "don't remove the returns if being invoked in the context of a return"
 					[inlineStmts at: inlineStmts size put: inlineStmts last copyWithoutReturn]]
 			ifFalse:
 				[inlineStmts add:
 					(TReturnNode new setExpression: (TVariableNode new setName: 'nil'))]].
+	
+	"If the inlined method has at least one return, we transfrom returns into gotos to a label at the end of the inlined method."
 	exitLabel ifNotNil:
 		[inlineStmts add:
 			(TLabeledCommentNode new setLabel:
-				exitLabel comment: 'end ', meth selector)].
+				exitLabel comment: 'end ', methodToInline selector)].
+	
+	"If the inlined method is only a comment, remove it."
 	inlineStmts size = 1 ifTrue: "Nuke empty methods; e.g. override of flushAtCache"
 		[self assert: inlineStmts first isComment.
 		 inlineStmts removeFirst].

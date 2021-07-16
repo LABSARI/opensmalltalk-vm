@@ -166,7 +166,6 @@ Gnuifier >> gnuifyFrom: inputFile to: outFileStream [
 													extraOutLine := '    PRIM_TABLE;' ] ]
 											ifFalse: [ 
 												inPrimitiveResponse ifTrue: [ 
-													1halt.
 													inLine = '	switch (primitiveIndex) {' ifTrue: [ 
 														extraOutLine := outLine.
 														outLine := '	PRIM_DISPATCH;' ].

@@ -9,3 +9,11 @@ CCodeGeneratorInlineNeverStrategy >> shouldInlineMethod: aMethod [
 
 	^ false
 ]
+
+{ #category : #'all checks' }
+CCodeGeneratorInlineNeverStrategy >> transformations [
+
+	^ { 
+		  (SLInterpreterLoopCaseInlining new localizingVars: #(  )).
+		  SLUnreachableMethodElimination new }
+]
