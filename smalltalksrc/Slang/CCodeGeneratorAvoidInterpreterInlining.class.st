@@ -1,6 +1,6 @@
 Class {
 	#name : #CCodeGeneratorAvoidInterpreterInlining,
-	#superclass : #CCodeGeneratorInlineStrategy,
+	#superclass : #CCodeGeneratorInlineAlwaysStrategy,
 	#category : #'Slang-CodeGeneration'
 }
 
