@@ -9,7 +9,7 @@ Class {
 
 { #category : #operations }
 SLInterpreterLoopCaseInlining >> applyTo: aCodeGen [
-
+	
 	aCodeGen
 		inlineDispatchesInMethodNamed: #interpret
 		localizingVars: localizingVars

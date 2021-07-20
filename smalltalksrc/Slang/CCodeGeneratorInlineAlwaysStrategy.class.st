@@ -23,12 +23,11 @@ CCodeGeneratorInlineAlwaysStrategy >> shouldInlineMethod: aTMethod [
 
 { #category : #'all checks' }
 CCodeGeneratorInlineAlwaysStrategy >> transformations [
-
+   
 	| transformations |
 	transformations := OrderedCollection new.
 	transformations add:
 		(SLInlining new inliningStrategy: inlineFlagOrSymbol).
-
 	codeGenerator vmClass ifNil: [ ^ transformations ].
 
 	1 to: 2 do: [ :index | 

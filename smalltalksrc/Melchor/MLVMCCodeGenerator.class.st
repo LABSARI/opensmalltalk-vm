@@ -116,8 +116,10 @@ MLVMCCodeGenerator >> doInlining: inlineFlagOrSymbol [
 
 	"Modified slightly for the core VM translator, since the first level of inlining for the interpret loop must be performed in order that the instruction implementations can easily discover their addresses. Remember to inline the bytecode routines as well"
 
-	inlineFlagOrSymbol asCCodeInlineStrategy transformations do: [ :each | 
-		each applyTo: self ]
+	| inlineStrategy |
+	inlineStrategy := inlineFlagOrSymbol asCCodeInlineStrategy.
+	inlineStrategy codeGenerator: self.
+	inlineStrategy transformations do: [ :each | each applyTo: self ]
 ]
 
 { #category : #'C code generator' }

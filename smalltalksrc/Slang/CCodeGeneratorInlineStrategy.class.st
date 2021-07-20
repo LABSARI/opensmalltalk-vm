@@ -28,20 +28,23 @@ CCodeGeneratorInlineStrategy class >> asSpecifiedOrQuick [
 
 { #category : #'instance creation' }
 CCodeGeneratorInlineStrategy class >> basicFrom: anObject [
-	
+
 	"The argument is either a boolean or a sumbol.
 	If a boolean, it indicates if we need to inline or not.
 	If == #asSpecified only inline methods marked with <inline: true>.
 	If == #asSpecifiedOrQuick only inline methods marked with <inline: true> or methods that are quick (^constant, ^inst var)."
-	
-	(#(true false) includes: anObject) ifTrue: [ 
-		^ anObject
-			ifTrue: [ self always ]
-			ifFalse: [ self never ].
-	].
+
+	(#( true false ) includes: anObject) ifTrue: [ 
+		^ (anObject
+			   ifTrue: [ self always ]
+			   ifFalse: [ self never ])
+			  inlineFlagOrSymbol: anObject;
+			  yourself ].
 
 	"If the object is a selector use a perform to instantiate it."
-	^ self perform: anObject
+	^ (self perform: anObject)
+		  inlineFlagOrSymbol: anObject;
+		  yourself
 ]
 
 { #category : #'instance creation' }
@@ -54,7 +57,7 @@ CCodeGeneratorInlineStrategy class >> from: anObject [
 
 	| inlineStrategy |
 	inlineStrategy := self basicFrom: anObject.
-	inlineStrategy inliningStrategy: anObject.
+	"inlineStrategy inliningStrategy: anObject."
 	^ inlineStrategy
 ]
 
@@ -62,6 +65,11 @@ CCodeGeneratorInlineStrategy class >> from: anObject [
 CCodeGeneratorInlineStrategy class >> never [
 
 	^ CCodeGeneratorInlineNeverStrategy new
+]
+
+{ #category : #converting }
+CCodeGeneratorInlineStrategy >> asCCodeInlineStrategy [
+	^ self
 ]
 
 { #category : #testing }
@@ -110,6 +118,12 @@ CCodeGeneratorInlineStrategy >> isSelectiveInlineStrategy [
 CCodeGeneratorInlineStrategy >> shouldInlineMethod: aMethod [
 
 	^ self canInline: aMethod
+]
+
+{ #category : #'all checks' }
+CCodeGeneratorInlineStrategy >> transformations [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #asserting }

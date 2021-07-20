@@ -37,6 +37,12 @@ PharoVMMaker class >> generate: aClassName outputDirectory: aDirectory [
 { #category : #generation }
 PharoVMMaker >> generate: interpreterClass memoryManager: memoryManager [
 
+	self generate: interpreterClass memoryManager: memoryManager inlineStrategy: true 
+]
+
+{ #category : #generation }
+PharoVMMaker >> generate: interpreterClass memoryManager: memoryManager inlineStrategy: anInlineStrategy [
+
 	| platformDirectory |
 	
 	Author useAuthor: 'vmMaker' during: [
@@ -58,7 +64,8 @@ PharoVMMaker >> generate: interpreterClass memoryManager: memoryManager [
 			to: platformDirectory
 			platformDir:platformDirectory
 			including: #()
-			configuration: VMMakerConfiguration)
+			configuration: VMMakerConfiguration) 
+				inlineStrategy: anInlineStrategy;
 				stopOnErrors: stopOnErrors;
 				internal: #() external: #(FilePlugin SurfacePlugin);
 				generateInterpreterFile;
@@ -71,6 +78,14 @@ PharoVMMaker >> generateCoInterpreter [
 
 	self generate: CoInterpreter memoryManager: Spur64BitCoMemoryManager.
 	self generate: CoInterpreter memoryManager: Spur32BitCoMemoryManager.	
+]
+
+{ #category : #generation }
+PharoVMMaker >> generateNonInlineInterpretVM [
+
+	self generate: StackInterpreter memoryManager: Spur64BitMemoryManager inlineStrategy: CCodeGeneratorAvoidInterpreterInlining new.
+
+
 ]
 
 { #category : #generation }
