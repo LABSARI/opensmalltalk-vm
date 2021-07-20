@@ -13134,26 +13134,18 @@ StackInterpreter >> pushLiteralConstant: literalIndex [
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> pushLiteralConstantBytecode [
+
 	<expandCases>
-	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self pushLiteralConstant: (currentBytecode bitAnd: 16r1F)]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self pushLiteralConstant: (currentBytecode bitAnd: 16r1F).
-			 self fetchNextBytecode]
+	self pushLiteralConstant: (currentBytecode bitAnd: 16r1F).
+	self fetchNextBytecode
 ]
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> pushLiteralVariable16CasesBytecode [
+
 	<expandCases>
-	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self pushLiteralVariable: (currentBytecode bitAnd: 16rF)]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self pushLiteralVariable: (currentBytecode bitAnd: 16rF).
-			 self fetchNextBytecode]
+	self pushLiteralVariable: (currentBytecode bitAnd: 16rF).
+	self fetchNextBytecode
 ]
 
 { #category : #'stack bytecodes' }
@@ -13177,14 +13169,10 @@ StackInterpreter >> pushLiteralVariable: literalIndex [
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> pushLiteralVariableBytecode [
+
 	<expandCases>
-	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self pushLiteralVariable: (currentBytecode bitAnd: 16r1F)]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self pushLiteralVariable: (currentBytecode bitAnd: 16r1F).
-			 self fetchNextBytecode]
+	self pushLiteralVariable: (currentBytecode bitAnd: 16r1F).
+	self fetchNextBytecode
 ]
 
 { #category : #'stack bytecodes' }
@@ -13267,14 +13255,10 @@ StackInterpreter >> pushReceiverVariable: fieldIndex [
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> pushReceiverVariableBytecode [
+
 	<expandCases>
-	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self pushReceiverVariable: (currentBytecode bitAnd: 16rF)]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self pushReceiverVariable: (currentBytecode bitAnd: 16rF).
-			 self fetchNextBytecode]
+	self pushReceiverVariable: (currentBytecode bitAnd: 16rF).
+	self fetchNextBytecode
 ]
 
 { #category : #'stack bytecodes' }
@@ -13305,14 +13289,10 @@ StackInterpreter >> pushTemporaryVariable: temporaryIndex [
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> pushTemporaryVariableBytecode [
+
 	<expandCases>
-	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self pushTemporaryVariable: (currentBytecode bitAnd: 16rF)]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self pushTemporaryVariable: (currentBytecode bitAnd: 16rF).
-			 self fetchNextBytecode]
+	self pushTemporaryVariable: (currentBytecode bitAnd: 16rF).
+	self fetchNextBytecode
 ]
 
 { #category : #'frame access' }
@@ -15623,16 +15603,14 @@ StackInterpreter >> storeAndPopRemoteTempLongBytecode [
 
 { #category : #'stack bytecodes' }
 StackInterpreter >> storeAndPopTemporaryVariableBytecode [
+
 	<expandCases>
 	self
-		cCode: "this bytecode will be expanded so that refs to currentBytecode below will be constant"
-			[self fetchNextBytecode.
-			 self temporary: (currentBytecode bitAnd: 7) in: localFP put: self internalStackTop.
-			 self internalPop: 1]
-		inSmalltalk: "Interpreter version has fetchNextBytecode out of order"
-			[self temporary: (currentBytecode bitAnd: 7) in: localFP put: self internalStackTop.
-			 self fetchNextBytecode.
-			 self internalPop: 1]
+		temporary: (currentBytecode bitAnd: 7)
+		in: localFP
+		put: self internalStackTop.
+	self fetchNextBytecode.
+	self internalPop: 1
 ]
 
 { #category : #utilities }
