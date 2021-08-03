@@ -89,6 +89,15 @@ PharoVMMaker >> generateNonInlineInterpretVM [
 ]
 
 { #category : #generation }
+PharoVMMaker >> generateNonInlineVM [
+
+	self
+		generate: StackInterpreter
+		memoryManager: Spur64BitMemoryManager
+		inlineStrategy: CCodeGeneratorAvoidInlining new
+]
+
+{ #category : #generation }
 PharoVMMaker >> generateStackVM [
 
 	self generate: StackInterpreter memoryManager: Spur64BitMemoryManager.
