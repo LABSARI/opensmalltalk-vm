@@ -932,6 +932,7 @@ CCodeGenerator >> defineAtCompileTime: aString [
 
 { #category : #inlining }
 CCodeGenerator >> doBasicInlining: inlineFlagOrSymbol [
+
 	"Inline the bodies of all methods that are suitable for inlining.
 	This method does only the basic inlining suitable for both the core VM and plugins - no bytecode inlining etc.
 	
@@ -942,28 +943,29 @@ CCodeGenerator >> doBasicInlining: inlineFlagOrSymbol [
 	self collectInlineList: inlineFlagOrSymbol.
 	pass := 0.
 	progress := true.
-	[progress] whileTrue: [
-		"repeatedly attempt to inline methods until no further progress is made"
+	[ progress ] whileTrue: [ "repeatedly attempt to inline methods until no further progress is made"
 		progress := false.
 		UIManager default
-			displayProgress: ('Inlining pass ', (pass := pass + 1) printString, '...')
-			from: 0 to: methods size
-			during: [:bar |
-				(self sortMethods: methods) doWithIndex: [:m :i |
+			displayProgress:
+			'Inlining pass ' , (pass := pass + 1) printString , '...'
+			from: 0
+			to: methods size
+			during: [ :bar | 
+				(self sortMethods: methods) doWithIndex: [ :m :i | 
 					bar value: i.
 					currentMethod := m.
-					(m tryToInlineMethodsIn: self)
-						ifTrue: [progress := true]]]].
-
-
+					(m tryToInlineMethodsIn: self inlineStrategy: inlineFlagOrSymbol) ifTrue: [ 
+						progress := true ] ] ] ]
 ]
 
 { #category : #inlining }
 CCodeGenerator >> doInlining: inlineFlag [
+
 	"do inlining for a plugin; avoid doing it twice and make sure that
 	 primitive prolog preparation is done immediately after inlining.
 	 Also, since sharing between plugins means that normal pruning
 	 can't be done, allow plugins that want to prune specific methods."
+
 	self doBasicInlining: inlineFlag
 ]
 
@@ -6664,22 +6666,6 @@ CCodeGenerator >> suppressAsmLabelsWhile: aBlock [
 	oldSuppressAsmLabels := suppressAsmLabels.
 	suppressAsmLabels := true.
 	^aBlock ensure: [suppressAsmLabels := oldSuppressAsmLabels]
-]
-
-{ #category : #utilities }
-CCodeGenerator >> testInliningFor: selector as: inlineFlagOrSymbol [
-	"Test inlining for the method with the given selector.
-	 Do all inlining first (cuz that's how the algorithm works).
-	 Then try and inline into a copy of the method.  This isn't
-	 exactly what happens in the real deal but is close enough."
-	| meth |
-	((breakDestInlineSelectors includes:  selector)
-	 or: [(breakSrcInlineSelectors includes:  selector)]) ifTrue:
-		[self halt].
-	meth := (self methodNamed: selector) copy.
-	self doBasicInlining: inlineFlagOrSymbol.
-	self halt.
-	meth tryToInlineMethodsIn: self
 ]
 
 { #category : #utilities }

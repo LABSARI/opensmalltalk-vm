@@ -1090,7 +1090,7 @@ TMethod >> incompleteSendsIn: aCodeGen [
 TMethod >> initialize [
 
 	super initialize.
-	declarations := Dictionary new
+	declarations := Dictionary new.
 ]
 
 { #category : #accessing }
@@ -1167,26 +1167,38 @@ TMethod >> inlineCaseStatementBranchesIn: aCodeGen localizingVars: varsList [
 ]
 
 { #category : #inlining }
-TMethod >> inlineCodeOrNilForStatement: aNode returningNodes: returningNodes in: aCodeGen [
+TMethod >> inlineCodeOrNilForStatement: aNode returningNodes: returningNodes in: inlineStrategy [
+
 	"If the given statement node can be inlined, answer the statements that replace it. Otherwise, answer nil."
 
 	| stmts |
-	(aNode isReturn
-	 and: [self inlineableSend: aNode expression in: aCodeGen]) ifTrue:
-		[stmts := self inlineSend: aNode expression
-						directReturn: true exitVar: nil in: aCodeGen.
-		stmts last endsWithReturn ifFalse:
-			[stmts at: stmts size put: stmts last asReturnNode].
-		^stmts].
-	(aNode isAssignment
-	 and: [self inlineableSend: aNode expression in: aCodeGen]) ifTrue:
-		[^self inlineSend: aNode expression
-				directReturn: false exitVar: aNode variable name in: aCodeGen].
-	(aNode isSend
-	 and: [self inlineableSend: aNode in: aCodeGen]) ifTrue:
-		[^self inlineSend: aNode
-				directReturn: (returningNodes includes: aNode) exitVar: nil in: aCodeGen].
-	^nil
+	(aNode isReturn and: [ 
+		 self inlineableSend: aNode expression in: inlineStrategy ]) 
+		ifTrue: [ 
+			stmts := self
+				         inlineSend: aNode expression
+				         directReturn: true
+				         exitVar: nil
+				         in: inlineStrategy codeGenerator.
+			stmts last endsWithReturn ifFalse: [ 
+				stmts at: stmts size put: stmts last asReturnNode ].
+			^ stmts ].
+	(aNode isAssignment and: [ 
+		 self inlineableSend: aNode expression in: inlineStrategy ]) 
+		ifTrue: [ 
+			^ self
+				  inlineSend: aNode expression
+				  directReturn: false
+				  exitVar: aNode variable name
+				  in: inlineStrategy codeGenerator ].
+	(aNode isSend and: [ self inlineableSend: aNode in: inlineStrategy ]) 
+		ifTrue: [ 
+			^ self
+				  inlineSend: aNode
+				  directReturn: (returningNodes includes: aNode)
+				  exitVar: nil
+				  in: inlineStrategy codeGenerator ].
+	^ nil
 ]
 
 { #category : #inlining }
@@ -1456,18 +1468,10 @@ TMethod >> inlineableFunctionCall: aNode in: aCodeGen [
 ]
 
 { #category : #inlining }
-TMethod >> inlineableSend: aNode in: aCodeGen [
+TMethod >> inlineableSend: aNode in: inlineStrategy [
 	"Answer if the given send node is a call to a method that can be inlined."
 
-	| m |
-	aCodeGen maybeBreakForTestToInline: aNode in: self.
-	aNode isSend ifFalse: [^false].
-	m := aCodeGen methodNamed: aNode selector.  "nil if builtin or external function"
-	^m ~= nil
-	 and: [m ~~ self
-	 and: [m mayBeInlined
-	 and: [(m isComplete and: [aCodeGen mayInline: m selector])
-		or: [m checkForRequiredInlinability]]]]
+	^ inlineStrategy inlineableSend: aNode inMethod: self
 ]
 
 { #category : #'primitive compilation' }
@@ -2857,7 +2861,7 @@ TMethod >> tryToInlineMethodExpressionsIn: aCodeGen [
 ]
 
 { #category : #inlining }
-TMethod >> tryToInlineMethodStatementsIn: aCodeGen statementListsInto: aBlock [
+TMethod >> tryToInlineMethodStatementsIn: aCodeGen statementListsInto: aBlock withInlineStrategy: inlineStrategy [
 	"Expand any (complete) inline methods sent by this method as top-level statements.
 	 Answer if anything was inlined."
 
@@ -2870,13 +2874,13 @@ TMethod >> tryToInlineMethodStatementsIn: aCodeGen statementListsInto: aBlock [
 			[returningNodes add: node expression.
 			 node expression isConditionalSend ifTrue:
 				[returningNodes addAll: (node expression args collect: [:stmtList| stmtList statements last])]]].
-	stmtLists := self statementsListsForInliningIn: aCodeGen.
+	stmtLists := inlineStrategy candidateStatementsForInliningIn: self.
 	stmtLists do:
 		[:stmtList|
 		newStatements := OrderedCollection new: stmtList statements size.
 		stmtList statements do:
 			[:stmt|
-			(self inlineCodeOrNilForStatement: stmt returningNodes: returningNodes in: aCodeGen)
+			(self inlineCodeOrNilForStatement: stmt returningNodes: returningNodes in: inlineStrategy)
 				ifNil: [newStatements addLast: stmt]
 				ifNotNil: [:inlinedStmts|
 					didSomething := true.
@@ -2900,7 +2904,8 @@ TMethod >> tryToInlineMethodStatementsIn: aCodeGen statementListsInto: aBlock [
 ]
 
 { #category : #inlining }
-TMethod >> tryToInlineMethodsIn: aCodeGen [
+TMethod >> tryToInlineMethodsIn: aCodeGen inlineStrategy: anInlineStrategy [
+
 	"Expand any (complete) inline methods sent by this method.
 	 Set the complete flag when all inlining has been done.
 	 Answer if something was inlined."
@@ -2908,23 +2913,25 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 	| didSomething statementLists |
 	"complete ifTrue:
 		[^false]."
-
-	self definedAsMacro ifTrue:
-		[complete ifTrue:
-			[^false].
-		 ^complete := true].
+	self definedAsMacro ifTrue: [ 
+		complete ifTrue: [ ^ false ].
+		^ complete := true ].
 
 	self ensureConditionalAssignmentsAreTransformedIn: aCodeGen.
-	didSomething := self tryToInlineMethodStatementsIn: aCodeGen statementListsInto: [:stmtLists| statementLists := stmtLists].
-	didSomething := (self tryToInlineMethodExpressionsIn: aCodeGen) or: [didSomething].
+	didSomething := self
+		                tryToInlineMethodStatementsIn: aCodeGen
+		                statementListsInto: [ :stmtLists | 
+		               			statementLists := stmtLists ]
+		                withInlineStrategy: anInlineStrategy.
+	didSomething := (self tryToInlineMethodExpressionsIn: aCodeGen) or: [ 
+		                didSomething ].
 
-	didSomething ifTrue:
-		[writtenToGlobalVarsCache := nil].
+	didSomething ifTrue: [ writtenToGlobalVarsCache := nil ].
 
-	complete ifFalse:
-		[self checkForCompletenessIn: aCodeGen.
-		 complete ifTrue: [didSomething := true]].  "marking a method complete is progress"
-	^didSomething
+	complete ifFalse: [ 
+		self checkForCompletenessIn: aCodeGen.
+		complete ifTrue: [ didSomething := true ] ]. "marking a method complete is progress"
+	^ didSomething
 ]
 
 { #category : #utilities }

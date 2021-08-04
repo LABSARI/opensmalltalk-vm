@@ -94,7 +94,7 @@ PharoVMMaker >> generateNonInlineVM [
 	self
 		generate: StackInterpreter
 		memoryManager: Spur64BitMemoryManager
-		inlineStrategy: CCodeGeneratorAvoidInlining new
+		inlineStrategy: false
 ]
 
 { #category : #generation }

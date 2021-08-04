@@ -750,7 +750,7 @@ VMMaker >> generateExternalPlugin: pluginName [
 	vmmakerConfiguration initializeForPlugins: optionsDictionary.
 	[exports := plugin
 					translateInDirectory: (self externalPluginsDirectoryFor: plugin)
-					doInlining: inline]
+					doInlining: true "plugins always inline"]
 		on:  ProvideAnswerNotification
 		do: [:ex|
 			ex tag == #logger

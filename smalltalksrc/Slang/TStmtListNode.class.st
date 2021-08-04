@@ -142,7 +142,7 @@ TStmtListNode >> assignLastExpressionTo: variableNode [
 { #category : #transformations }
 TStmtListNode >> bindVariableUsesIn: aDictionary [
 
-	statements := statements collect: [ :s | s bindVariableUsesIn: aDictionary ].
+	self setStatements: (statements collect: [ :s | s bindVariableUsesIn: aDictionary ])
 ]
 
 { #category : #transformations }
@@ -161,7 +161,7 @@ TStmtListNode >> bindVariableUsesIn: aDictionary andConstantFoldIf: constantFold
 { #category : #transformations }
 TStmtListNode >> bindVariablesIn: aDictionary [
 
-	statements := statements collect: [ :s | s bindVariablesIn: aDictionary ].
+	self setStatements: (statements collect: [ :s | s bindVariablesIn: aDictionary ])
 ]
 
 { #category : #transformations }
@@ -330,7 +330,7 @@ TStmtListNode >> nodesDo: aBlock value: parent [
 TStmtListNode >> postCopy [
 
 	arguments := arguments copy.
-	statements := statements collect: [ :s | s copy ]
+	self setStatements: (statements collect: [ :s | s copy ])
 ]
 
 { #category : #printing }
@@ -380,7 +380,7 @@ TStmtListNode >> renameLabelsForInliningInto: aTMethod [
 
 { #category : #transformations }
 TStmtListNode >> replaceChild: aNode with: bNode [ 
-	statements := Array streamContents:
+	self setStatements: (OrderedCollection streamContents:
 					[:s|
 					statements do:
 						[:node|
@@ -389,14 +389,14 @@ TStmtListNode >> replaceChild: aNode with: bNode [
 								[bNode isStmtList
 									ifTrue: [s nextPutAll: bNode statements]
 									ifFalse: [s nextPut: bNode]]
-							ifFalse: [s nextPut: node]]]
+							ifFalse: [s nextPut: node]]])
 ]
 
 { #category : #transformations }
 TStmtListNode >> replaceNodesIn: aDictionary [
 
 	^aDictionary at: self ifAbsent: [
-		statements := statements collect: [ :s | s replaceNodesIn: aDictionary ].
+		self setStatements: (statements collect: [ :s | s replaceNodesIn: aDictionary ]).
 		self]
 ]
 
@@ -425,7 +425,7 @@ TStmtListNode >> setArguments: argList statements: statementList [
 	"Initialize this method using the given information."
 
 	arguments := argList.
-	statements := statementList.
+	self setStatements: statementList
 ]
 
 { #category : #accessing }

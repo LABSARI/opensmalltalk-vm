@@ -14,6 +14,8 @@ CCodeGeneratorInlineNeverStrategy >> shouldInlineMethod: aMethod [
 CCodeGeneratorInlineNeverStrategy >> transformations [
 
 	^ { 
+		  (SLInlining new inliningStrategy:
+			   CCodeGeneratorInlineBlockStrategy new).
 		  (SLInterpreterLoopCaseInlining new localizingVars: #(  )).
 		  SLUnreachableMethodElimination new }
 ]
