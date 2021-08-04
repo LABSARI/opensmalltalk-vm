@@ -340,7 +340,7 @@ StackInterpreterPrimitives >> frameIsMarked: theFPInt [
 
 { #category : #'ffi - helpers' }
 StackInterpreterPrimitives >> freeArgumentsArray: arguments count: count [
-
+ 	<var: #arguments type: #'sqInt *'>
 	0 to: count - 1 do: [ :i |  
 		(arguments at: i) ifNotNil: [ :aPtr | 
 			arguments at: i put: nil.

@@ -2874,7 +2874,7 @@ TMethod >> tryToInlineMethodStatementsIn: aCodeGen statementListsInto: aBlock wi
 			[returningNodes add: node expression.
 			 node expression isConditionalSend ifTrue:
 				[returningNodes addAll: (node expression args collect: [:stmtList| stmtList statements last])]]].
-	stmtLists := inlineStrategy candidateStatementsForInliningIn: self.
+	stmtLists := inlineStrategy asCCodeInlineStrategy candidateStatementsForInliningIn: self.
 	stmtLists do:
 		[:stmtList|
 		newStatements := OrderedCollection new: stmtList statements size.
