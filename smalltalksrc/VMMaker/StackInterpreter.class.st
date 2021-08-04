@@ -5230,7 +5230,7 @@ StackInterpreter >> createActualMessageTo: lookupClass [
 	| argumentArray message |
 	<inline: false> "This is a useful break-point"
 	self assert: ((objectMemory isImmediate: messageSelector) or: [objectMemory addressCouldBeObj: messageSelector]).
-	self mnuBreakpoint: messageSelector receiver: nil.
+	self mnuBreakPoint: messageSelector receiver: nil.
 	objectMemory hasSpurMemoryManagerAPI
 		ifTrue:
 			[argumentArray := objectMemory
@@ -7293,6 +7293,13 @@ StackInterpreter >> frameNumArgs: theFP [
 	<inline: true>
 	<var: #theFP type: #'char *'>
 	^stackPages byteAt: theFP + FoxFrameFlags + 1
+]
+
+{ #category : #'frame access' }
+StackInterpreter >> frameNumTemps: theFP [
+	"For subclasses to redefine to implement different closure semantics."
+	<var: #theFP type: #'char *'>
+	^0
 ]
 
 { #category : #'frame access' }
@@ -10852,7 +10859,7 @@ StackInterpreter >> mnuBreak: selectorString point: selectorLength receiver: rec
 ]
 
 { #category : #'debug support' }
-StackInterpreter >> mnuBreakpoint: selector receiver: rcvr [
+StackInterpreter >> mnuBreakPoint: selector receiver: rcvr [
 	<inline: true>
 	self mnuBreak: (objectMemory firstFixedFieldOfMaybeImmediate: selector)
 		point: (objectMemory lengthOfMaybeImmediate: selector)

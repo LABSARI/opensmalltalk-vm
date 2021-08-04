@@ -3478,13 +3478,6 @@ CoInterpreter >> frameNumArgs: theFP [
 		ifFalse: [stackPages byteAt: theFP + FoxIFrameFlags + 1]
 ]
 
-{ #category : #'frame access' }
-CoInterpreter >> frameNumTemps: theFP [
-	"For subclasses to redefine to implement different closure semantics."
-	<var: #theFP type: #'char *'>
-	^0
-]
-
 { #category : #'trampoline support' }
 CoInterpreter >> framePointerAddress [
 	<api>
