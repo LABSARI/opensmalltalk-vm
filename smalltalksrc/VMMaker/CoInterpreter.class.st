@@ -1768,7 +1768,7 @@ CoInterpreter >> ceSend: selector above: methodClass to: rcvr numArgs: numArgs [
 	"self printStringOf: selector"
 	cogit assertCStackWellAligned.
 	self assert: (objectMemory addressCouldBeOop: rcvr).
-	self sendBreakpoint: selector receiver: rcvr.
+	self sendBreakPoint: selector receiver: rcvr.
 	classTag := objectMemory classTagForClass: (self superclassOf: (objectMemory followMaybeForwarded: methodClass)).
 	argumentCount := numArgs.
 	(self lookupInMethodCacheSel: selector classTag: classTag)
@@ -1869,7 +1869,7 @@ CoInterpreter >> ceSend: selector super: superNormalBar to: rcvr numArgs: numArg
 	"self printStringOf: selector"
 	cogit assertCStackWellAligned.
 	self assert: (objectMemory addressCouldBeOop: rcvr).
-	self sendBreakpoint: selector receiver: rcvr.
+	self sendBreakPoint: selector receiver: rcvr.
 	superNormalBar = 0
 		ifTrue: [classTag := objectMemory fetchClassTagOf: rcvr]
 		ifFalse: [classTag := objectMemory classTagForClass: (self superclassOf: (self methodClassOf: (self frameMethodObject: framePointer)))].
@@ -1963,7 +1963,7 @@ CoInterpreter >> ceSendAbort: selector to: rcvr numArgs: numArgs [
 	"self printStringOf: selector"
 	cogit assertCStackWellAligned.
 	self assert: (objectMemory addressCouldBeOop: rcvr).
-	self sendBreakpoint: selector receiver: rcvr.
+	self sendBreakPoint: selector receiver: rcvr.
 	argumentCount := numArgs.
 	classTag := objectMemory fetchClassTagOf: rcvr.
 	(self lookupInMethodCacheSel: selector classTag: classTag)
@@ -2180,7 +2180,7 @@ CoInterpreter >> ceTraceLinkedSend: theReceiver [
 			isBlock: false
 			firstTemporary: (self cCode: [nil] inSmalltalk: [0]);
 			cr].
-	self sendBreakpoint: cogMethod selector receiver: theReceiver
+	self sendBreakPoint: cogMethod selector receiver: theReceiver
 ]
 
 { #category : #trampolines }
@@ -2491,7 +2491,7 @@ CoInterpreter >> commonSendOrdinary [
 	the receiver and arguments have been pushed onto the stack,"
 	"Note: This method is inlined into the interpreter dispatch loop."
 	<sharedCodeNamed: 'commonSendOrdinary' inCase: #singleExtendedSendBytecode>
-	self sendBreakpoint: messageSelector receiver: (self internalStackValue: argumentCount).
+	self sendBreakPoint: messageSelector receiver: (self internalStackValue: argumentCount).
 	cogit recordSendTrace ifTrue:
 		[self recordTrace: (objectMemory classForClassTag: lkupClassTag)
 			thing: messageSelector

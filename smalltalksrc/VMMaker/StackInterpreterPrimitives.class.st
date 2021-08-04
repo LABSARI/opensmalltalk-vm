@@ -2685,7 +2685,7 @@ StackInterpreterPrimitives >> primitivePerform [
 			put: (stackPages longAt: stackPointer + ((i - 1) * objectMemory wordSize))].
 	self pop: 1.
 	lookupClassTag := objectMemory fetchClassTagOf: newReceiver.
-	self sendBreakpoint: messageSelector receiver: newReceiver.
+	self sendBreakPoint: messageSelector receiver: newReceiver.
 	self printSends ifTrue:
 		[self printActivationNameForSelector: messageSelector
 			startClass: (objectMemory classForClassTag: lookupClassTag); cr].

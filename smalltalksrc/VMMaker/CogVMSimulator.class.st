@@ -3029,7 +3029,7 @@ CogVMSimulator >> primitivePerform [
 	((self methodHasCogMethod: newMethod)
 	 and: [(objectMemory isCompactInstance: receiver) not]) ifTrue:
 		[self deny: (self newMethodInLookupCacheAt: selector and: (objectMemory fetchClassTagOf: receiver))].
-	self sendBreakpoint: selector receiver: receiver.
+	self sendBreakPoint: selector receiver: receiver.
 	(self filterPerformOf: selector to: receiver) ifTrue:
 		[^self pop: argumentCount].
 	^super primitivePerform

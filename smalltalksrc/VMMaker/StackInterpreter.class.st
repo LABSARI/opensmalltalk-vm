@@ -4973,7 +4973,7 @@ StackInterpreter >> commonSendOrdinary [
 	the receiver and arguments have been pushed onto the stack,"
 	"Note: This method is inlined into the interpreter dispatch loop."
 	<sharedCodeInCase: #singleExtendedSendBytecode>
-	self sendBreakpoint: messageSelector receiver: (self internalStackValue: argumentCount).
+	self sendBreakPoint: messageSelector receiver: (self internalStackValue: argumentCount).
 	self printSends ifTrue:
 		[self printActivationNameForSelector: messageSelector startClass: (objectMemory classForClassTag: lkupClassTag); cr].
 	self internalFindNewMethodOrdinary.
@@ -9642,7 +9642,7 @@ StackInterpreter >> lookupMethodInClass: class [
 				-- raise exception #cannotInterpret:."
 			self createActualMessageTo: class.
 			messageSelector := objectMemory splObj: SelectorCannotInterpret.
-			self sendBreakpoint: messageSelector receiver: nil.
+			self sendBreakPoint: messageSelector receiver: nil.
 			^self lookupMethodInClass: (self superclassOf: currentClass)].
 		found := self lookupMethodInDictionary: dictionary.
 		found ifTrue: [^currentClass].
@@ -11711,7 +11711,7 @@ StackInterpreter >> primitiveObject: actualReceiver perform: selector withArgume
 		[:index| self push: (objectMemory fetchPointer: index - 1 ofObject: argumentArray)].
 	argumentCount := arraySize.
 	messageSelector := selector.
-	self sendBreakpoint: messageSelector receiver: actualReceiver.
+	self sendBreakPoint: messageSelector receiver: actualReceiver.
 	self printSends ifTrue:
 		[self printActivationNameForSelector: messageSelector
 				startClass: (lookupClassOrNil isNil
@@ -14182,7 +14182,7 @@ StackInterpreter >> sendBreak: selectorString point: selectorLength receiver: re
 ]
 
 { #category : #'debug support' }
-StackInterpreter >> sendBreakpoint: selector receiver: rcvr [
+StackInterpreter >> sendBreakPoint: selector receiver: rcvr [
 	<inline: true>
 	self sendBreak: (objectMemory firstFixedFieldOfMaybeImmediate: selector)
 		point: (objectMemory lengthOfMaybeImmediate: selector)
