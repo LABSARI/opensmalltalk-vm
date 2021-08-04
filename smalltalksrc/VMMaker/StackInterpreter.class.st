@@ -12611,53 +12611,62 @@ StackInterpreter >> printOopShortInner: oop [
 	<inline: true>
 	(objectMemory isImmediate: oop) ifTrue:
 		[(objectMemory isImmediateCharacter: oop) ifTrue:
-			[^self
+			[self
 				printChar: $$;
 				printChar: (objectMemory characterValueOf: oop);
 				printChar: $(;
 				printHexnp: (objectMemory characterValueOf: oop);
-				printChar: $)].
+				printChar: $).
+				^ self].
 		 (objectMemory isIntegerObject: oop) ifTrue:
-			[^self
+			[self
 				printNum: (objectMemory integerValueOf: oop);
 				printChar: $(;
 				printHexnp: (objectMemory integerValueOf: oop);
-				printChar: $)].
+				printChar: $).
+				^ self].
 		 (objectMemory isImmediateFloat: oop) ifTrue:
-			[^self
+			[self
 				printFloat: (objectMemory dbgFloatValueOf: oop);
 				printChar: $(;
 				printHexnp: oop;
-				printChar: $)].
-		 ^self print: 'unknown immediate '; printHexnp: oop].
+				printChar: $).
+				^ self].
+		 self print: 'unknown immediate '; printHexnp: oop.
+		^ self].
 	(objectMemory addressCouldBeObj: oop) ifFalse:
-		[^self print: ((oop bitAnd: objectMemory allocationUnit - 1) ~= 0
+		[self print: ((oop bitAnd: objectMemory allocationUnit - 1) ~= 0
 						ifTrue: [' is misaligned']
-						ifFalse: [self whereIs: oop])].
+						ifFalse: [self whereIs: oop]).
+					^ self].
 	(objectMemory isFreeObject: oop) ifTrue:
-		[^self print: ' is a free chunk'].
+		[self print: ' is a free chunk'.
+		^ self].
 	(objectMemory isForwarded: oop) ifTrue:
-		[^self print: ' is a forwarder to '; printHexnp: (objectMemory followForwarded: oop)].
+		[self print: ' is a forwarder to '; printHexnp: (objectMemory followForwarded: oop).
+		^ self].
 	(self isFloatObject: oop) ifTrue:
-		[^self printFloat: (objectMemory dbgFloatValueOf: oop)].
+		[self printFloat: (objectMemory dbgFloatValueOf: oop).
+		^ self].
 	classOop := objectMemory fetchClassOfNonImm: oop.
 	(objectMemory addressCouldBeObj: classOop) ifFalse:
-		[^self print: 'a ??'].
+		[self print: 'a ??'.
+		^ self].
 	(objectMemory numSlotsOf: classOop) = metaclassNumSlots ifTrue:
 		[^self printNameOfClass: oop count: 5].
-	oop = objectMemory nilObject ifTrue: [^self print: 'nil'].
-	oop = objectMemory trueObject ifTrue: [^self print: 'true'].
-	oop = objectMemory falseObject ifTrue: [^self print: 'false'].
+	oop = objectMemory nilObject ifTrue: [self print: 'nil'. ^ self].
+	oop = objectMemory trueObject ifTrue: [self print: 'true'. ^ self].
+	oop = objectMemory falseObject ifTrue: [self print: 'false'. ^ self].
 	nameLen := self lengthOfNameOfClass: classOop.
-	nameLen = 0 ifTrue: [^self print: 'a ??'].
+	nameLen = 0 ifTrue: [self print: 'a ??'. ^ self].
 	name := self nameOfClass: classOop.
 	nameLen = 10 ifTrue:
 		[(self strncmp: name _: 'ByteString' _: 10) = 0 "strncmp is weird" ifTrue:
-			[^self printChar: $'; printStringOf: oop; printChar: $'].
+			[self printChar: $'; printStringOf: oop; printChar: $'. ^ self].
 		 (self strncmp: name _: 'ByteSymbol' _: 10) = 0 "strncmp is weird" ifTrue:
 			[self printChar: $#; printStringOf: oop. ^self]].
 	(nameLen = 9 and: [(self strncmp: name _: 'Character' _: 9) = 0]) ifTrue:
-		[^self printChar: $$; printChar: (objectMemory integerValueOf: (objectMemory fetchPointer: 0 ofObject: oop))].
+		[self printChar: $$; printChar: (objectMemory integerValueOf: (objectMemory fetchPointer: 0 ofObject: oop)). ^ self].
 	self print: 'a(n) '.
 	self
 		cCode: [0 to: nameLen - 1 do: [:i| self printChar: (name at: i)]]
