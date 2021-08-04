@@ -12772,7 +12772,7 @@ SpurMemoryManager >> tenuringThreshold: threshold [
 	"c.f. tenuringThreshold"
 	threshold < 0 ifTrue:
 		[^PrimErrBadArgument].
-	scavenger scavengerTenuringThreshold:
+	scavenger setScavengerTenuringThreshold:
 		(threshold * self averageObjectSizeInBytes) asFloat
 		/ scavenger pastSpaceBytes asFloat.
 	^0

@@ -1358,15 +1358,6 @@ SpurGenerationScavenger >> scavengerTenuringThreshold [ "(Slang flattens so need
 		ifFalse: [0]
 ]
 
-{ #category : #accessing }
-SpurGenerationScavenger >> scavengerTenuringThreshold: aProportion [ "(Slang flattens so need unique selectors)"
-	<var: 'aProportion' type: #double>
-	tenuringProportion := aProportion.
-	tenureThreshold := aProportion = 0.0
-							ifTrue: [0]
-							ifFalse: [((pastSpace limit - pastSpace start) * (1.0 - aProportion)) rounded + pastSpace start]
-]
-
 { #category : #'weakness and ephemerality' }
 SpurGenerationScavenger >> setCorpseOffsetOf: corpse to: offset [
 	"Set the offset of the corpse's next corpse to offset.  Use the identityHash
@@ -1425,6 +1416,15 @@ SpurGenerationScavenger >> setRememberedSetRedZone [
 	 full until it has from 512 to 1024 entries."
 	fudge := eden limit - eden start / manager wordSize // 1024.
 	rememberedSetRedZone := rememberedSetLimit * 3 // 4 max: fudge
+]
+
+{ #category : #accessing }
+SpurGenerationScavenger >> setScavengerTenuringThreshold: aProportion [ "(Slang flattens so need unique selectors)"
+	<var: 'aProportion' type: #double>
+	tenuringProportion := aProportion.
+	tenureThreshold := aProportion = 0.0
+							ifTrue: [0]
+							ifFalse: [((pastSpace limit - pastSpace start) * (1.0 - aProportion)) rounded + pastSpace start]
 ]
 
 { #category : #scavenger }
