@@ -354,6 +354,14 @@ CogStackPages >> setInterpreter: anInterpreter [
 	objectMemory := coInterpreter objectMemory
 ]
 
+{ #category : #statistics }
+CogStackPages >> setStatAverageLivePagesWhenMapping: aFloat [
+	<var: #aFloat type: #double>
+	aFloat == 0.0
+		ifTrue: [statPageCountWhenMappingSum := statNumMaps := 0]
+		ifFalse: [coInterpreter primitiveFailFor: PrimErrBadArgument]
+]
+
 { #category : #assertions }
 CogStackPages >> somePageHasHeadFrameFP: theFP [
 	<doNotGenerate>
@@ -393,14 +401,6 @@ CogStackPages >> statAverageLivePagesWhenMapping [
 	^statNumMaps = 0
 		ifTrue: [0.0]
 		ifFalse: [statPageCountWhenMappingSum asFloat / statNumMaps]
-]
-
-{ #category : #statistics }
-CogStackPages >> statAverageLivePagesWhenMapping: aFloat [
-	<var: #aFloat type: #double>
-	aFloat == 0.0
-		ifTrue: [statPageCountWhenMappingSum := statNumMaps := 0]
-		ifFalse: [coInterpreter primitiveFailFor: PrimErrBadArgument]
 ]
 
 { #category : #statistics }

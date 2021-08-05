@@ -11710,6 +11710,11 @@ SpurMemoryManager >> setObjectFree: objOop [
 	self setFree: objOop
 ]
 
+{ #category : #accessing }
+SpurMemoryManager >> setStatMaxAllocSegmentTime: aValue [
+	statMaxAllocSegmentTime := aValue
+]
+
 { #category : #'word size' }
 SpurMemoryManager >> shiftForAllocationUnit [
 	^3
@@ -12221,11 +12226,6 @@ SpurMemoryManager >> statMarkUsecs [
 { #category : #accessing }
 SpurMemoryManager >> statMaxAllocSegmentTime [
 	^statMaxAllocSegmentTime
-]
-
-{ #category : #accessing }
-SpurMemoryManager >> statMaxAllocSegmentTime: aValue [
-	statMaxAllocSegmentTime := aValue
 ]
 
 { #category : #accessing }

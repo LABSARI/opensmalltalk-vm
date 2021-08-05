@@ -2860,7 +2860,7 @@ StackInterpreterPrimitives >> primitiveSetVMParameter: index arg: argOop [
 					 primFailCode := objectMemory setMaxOldSpaceSize: arg]].
 		[68] ->	[result := objectMemory floatObjectOf: stackPages statAverageLivePagesWhenMapping.
 				 self initPrimCall. "i.e. statAverageLivePagesWhenMapping: is allowed to fail"
-				 stackPages statAverageLivePagesWhenMapping: (self noInlineLoadFloatOrIntFrom: argOop)].
+				 stackPages setStatAverageLivePagesWhenMapping: (self noInlineLoadFloatOrIntFrom: argOop)].
 		[69] ->	[arg >= 0 ifTrue:
 					[result := objectMemory integerObjectOf: stackPages statMaxPageCountWhenMapping.
 					 stackPages statMaxPageCountWhenMapping: arg.
@@ -2868,7 +2868,7 @@ StackInterpreterPrimitives >> primitiveSetVMParameter: index arg: argOop [
 		[74] ->	[(arg >= 0
 				  and: [objectMemory hasSpurMemoryManagerAPI]) ifTrue:
 					[result := objectMemory integerObjectOf: objectMemory statMaxAllocSegmentTime + 500 // 1000.
-					 stackPages statMaxAllocSegmentTime: arg. "usually 0"
+					 stackPages setStatMaxAllocSegmentTime: arg. "usually 0"
 					 self initPrimCall]] }
 		otherwise: [].
 
