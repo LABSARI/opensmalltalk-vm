@@ -591,7 +591,8 @@ TMethod >> emitCLocalsOn: aStream generator: aCodeGen [
 					nextPutAll: decl;
 					nextPut: $;;
 					cr]].
-		 aStream cr]
+		 aStream cr] 
+	ifTrue: [ aStream cr ]. "We need an empty line for Gnuifier, it includes jump table here."	
 ]
 
 { #category : #'C code generation' }
