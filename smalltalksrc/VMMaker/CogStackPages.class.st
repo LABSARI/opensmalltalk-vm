@@ -362,6 +362,11 @@ CogStackPages >> setStatAverageLivePagesWhenMapping: aFloat [
 		ifFalse: [coInterpreter primitiveFailFor: PrimErrBadArgument]
 ]
 
+{ #category : #statistics }
+CogStackPages >> setStatMaxPageCountWhenMapping: num [
+	statMaxPageCountWhenMapping := num
+]
+
 { #category : #assertions }
 CogStackPages >> somePageHasHeadFrameFP: theFP [
 	<doNotGenerate>
@@ -407,11 +412,6 @@ CogStackPages >> statAverageLivePagesWhenMapping [
 CogStackPages >> statMaxPageCountWhenMapping [
 	<cmacro: '() GIV(statMaxPageCountWhenMapping)'>
 	^statMaxPageCountWhenMapping
-]
-
-{ #category : #statistics }
-CogStackPages >> statMaxPageCountWhenMapping: num [
-	statMaxPageCountWhenMapping := num
 ]
 
 { #category : #'debug printing' }

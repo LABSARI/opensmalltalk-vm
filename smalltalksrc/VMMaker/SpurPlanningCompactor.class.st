@@ -458,7 +458,7 @@ SpurPlanningCompactor >> initializeCompaction [
 	manager
 		prepareObjStacksForPlanningCompactor;
 		resetFreeListHeads;
-		totalFreeOldSpace: 0;
+		setTotalFreeOldSpace: 0;
 		beginSlidingCompaction.
 	savedFirstFieldsSpace top: savedFirstFieldsSpace start - manager bytesPerOop
 ]

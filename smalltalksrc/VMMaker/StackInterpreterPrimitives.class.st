@@ -2863,7 +2863,7 @@ StackInterpreterPrimitives >> primitiveSetVMParameter: index arg: argOop [
 				 stackPages setStatAverageLivePagesWhenMapping: (self noInlineLoadFloatOrIntFrom: argOop)].
 		[69] ->	[arg >= 0 ifTrue:
 					[result := objectMemory integerObjectOf: stackPages statMaxPageCountWhenMapping.
-					 stackPages statMaxPageCountWhenMapping: arg.
+					 stackPages setStatMaxPageCountWhenMapping: arg.
 					 self initPrimCall]].
 		[74] ->	[(arg >= 0
 				  and: [objectMemory hasSpurMemoryManagerAPI]) ifTrue:

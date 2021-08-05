@@ -8874,13 +8874,11 @@ SpurMemoryManager >> memmove: destAddress _: sourceAddress _: bytes [
 { #category : #accessing }
 SpurMemoryManager >> memory [
 	<cmacro: '() GIV(memory)'>
-	1halt.
 	^memory
 ]
 
 { #category : #accessing }
 SpurMemoryManager >> memory: aValue [
-	1halt.
 	^memory := aValue
 ]
 
@@ -11715,6 +11713,11 @@ SpurMemoryManager >> setStatMaxAllocSegmentTime: aValue [
 	statMaxAllocSegmentTime := aValue
 ]
 
+{ #category : #accessing }
+SpurMemoryManager >> setTotalFreeOldSpace: anInteger [
+	totalFreeOldSpace := anInteger
+]
+
 { #category : #'word size' }
 SpurMemoryManager >> shiftForAllocationUnit [
 	^3
@@ -12874,11 +12877,6 @@ SpurMemoryManager >> totalFreeListBytes [
 SpurMemoryManager >> totalFreeOldSpace [
 	<doNotGenerate>
 	^ totalFreeOldSpace
-]
-
-{ #category : #accessing }
-SpurMemoryManager >> totalFreeOldSpace: anInteger [
-	totalFreeOldSpace := anInteger
 ]
 
 { #category : #accessing }

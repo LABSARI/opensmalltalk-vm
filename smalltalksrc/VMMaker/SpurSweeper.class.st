@@ -84,7 +84,7 @@ SpurSweeper >> interceptAddFreeChunkWithBytes: bytes at: start [
 { #category : #api }
 SpurSweeper >> resetFreeLists [
 	manager resetFreeListHeads.
-	manager totalFreeOldSpace: 0.
+	manager setTotalFreeOldSpace: 0.
 ]
 
 { #category : #'sweep phase' }
