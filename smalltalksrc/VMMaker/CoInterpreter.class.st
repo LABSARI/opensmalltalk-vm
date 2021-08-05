@@ -6226,8 +6226,8 @@ CoInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: imag
 	headerSize			:= self getWord32FromFile: f swap: swapBytes.
 	dataSize			:= self getLongFromFile: f swap: swapBytes.
 	oldBaseAddr		:= self getLongFromFile: f swap: swapBytes.
-	objectMemory specialObjectsOop: (self getLongFromFile: f swap: swapBytes).
-	objectMemory lastHash: (self getLongFromFile: f swap: swapBytes). "N.B.  not used."
+	objectMemory setSpecialObjectsOop: (self getLongFromFile: f swap: swapBytes).
+	objectMemory setLastHash: (self getLongFromFile: f swap: swapBytes). "N.B.  not used."
 	savedWindowSize	:= self getLongFromFile: f swap: swapBytes.
 	headerFlags		:= self getLongFromFile: f swap: swapBytes.
 	self setImageHeaderFlagsFrom: headerFlags.
@@ -6256,7 +6256,7 @@ CoInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: imag
 	cogCodeSize > cogit maxCogCodeSize ifTrue:
 		[cogCodeSize := cogit maxCogCodeSize].
 	hdrEdenBytes		:= self getWord32FromFile: f swap: swapBytes.
-	objectMemory edenBytes: (desiredEdenBytes ~= 0
+	objectMemory setEdenBytes: (desiredEdenBytes ~= 0
 						ifTrue: [desiredEdenBytes]
 						ifFalse:
 							[hdrEdenBytes = 0
@@ -6270,7 +6270,7 @@ CoInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: imag
 	 Preserve it to be polite to other VMs."
 	the2ndUnknownShort	:= self getShortFromFile: f swap: swapBytes.
 	firstSegSize := self getLongFromFile: f swap: swapBytes.
-	objectMemory firstSegmentSize: firstSegSize.
+	objectMemory setFirstSegmentSize: firstSegSize.
 
 	"compare memory requirements with availability"
 	allocationReserve := self interpreterAllocationReserveBytes.
@@ -6298,7 +6298,7 @@ CoInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: imag
 	desiredPositionOfHeap := (cogCodeBase + cogCodeSize) max: oldBaseAddr.
 
 	"allocate a contiguous block of memory for the Squeak heap and ancilliary data structures"
-	objectMemory memory: (self
+	objectMemory setMemory: (self
 								allocateMemory: heapSize
 								minimum: minimumMemory
 								imageFile: f

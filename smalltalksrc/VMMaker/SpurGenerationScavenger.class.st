@@ -1427,6 +1427,16 @@ SpurGenerationScavenger >> setScavengerTenuringThreshold: aProportion [ "(Slang 
 							ifFalse: [((pastSpace limit - pastSpace start) * (1.0 - aProportion)) rounded + pastSpace start]
 ]
 
+{ #category : #accessing }
+SpurGenerationScavenger >> setStatTenures: aValue [
+	statTenures := aValue
+]
+
+{ #category : #accessing }
+SpurGenerationScavenger >> setTenuringClassIndex: anInteger [
+	tenuringClassIndex := anInteger
+]
+
 { #category : #scavenger }
 SpurGenerationScavenger >> shouldBeTenured: survivor [
 	"Answer if an object should be tenured.  The default policy tenuring policy
@@ -1468,11 +1478,6 @@ SpurGenerationScavenger >> statTenures [
 	^statTenures
 ]
 
-{ #category : #accessing }
-SpurGenerationScavenger >> statTenures: aValue [
-	statTenures := aValue
-]
-
 { #category : #'remembered set' }
 SpurGenerationScavenger >> strategizeToLimitRememberedTable [
 	<inline: true>
@@ -1485,11 +1490,6 @@ SpurGenerationScavenger >> strategizeToLimitRememberedTable [
 { #category : #accessing }
 SpurGenerationScavenger >> tenuringClassIndex [
 	^tenuringClassIndex
-]
-
-{ #category : #accessing }
-SpurGenerationScavenger >> tenuringClassIndex: anInteger [
-	tenuringClassIndex := anInteger
 ]
 
 { #category : #logging }

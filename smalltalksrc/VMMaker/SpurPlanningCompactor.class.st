@@ -177,12 +177,6 @@ SpurPlanningCompactor class >> simulatorClass [
 ]
 
 { #category : #'compaction - api' }
-SpurPlanningCompactor >> biasForGC [
-	<inline: true>
-	biasForGC := true
-]
-
-{ #category : #'compaction - api' }
 SpurPlanningCompactor >> biasForSnapshot [
 	biasForGC := false
 ]
@@ -733,6 +727,12 @@ SpurPlanningCompactor >> selectSavedFirstFieldsSpace [
 		 (self useSegmentForSavedFirstFieldsSpace: spaceEstimate) ifTrue:
 			[^self]].
 	self useEdenForSavedFirstFieldsSpace
+]
+
+{ #category : #'compaction - api' }
+SpurPlanningCompactor >> setBiasForGC [
+	<inline: true>
+	biasForGC := true
 ]
 
 { #category : #'gc - scavenge/compact' }

@@ -384,7 +384,7 @@ SpurPlanningCompactorTests >> testRandomAssortmentWithNewSegment: random with: t
 	self assert: om endOfMemory equals: (om addressAfter: (om objectAfter: (om objectAfter: (om objectAfter: obj)))).
 
 	"And the memory should shrink if the shrinkThreshold is low enough"
-	om shrinkThreshold: om growHeadroom.
+	om setShrinkThreshold: om growHeadroom.
 	om attemptToShrink.
 	self assert: om segmentManager numSegments = 1.
 	self checkForLeaksIn: om
@@ -648,7 +648,7 @@ SpurPlanningCompactorTests >> testRunOfObjectsWithExtraSegment [
 	self assert: om endOfMemory equals: (om addressAfter: (om objectAfter: (om objectAfter: obj))).
 
 	"And the memory should shrink if the shrinkThreshold is low enough"
-	om shrinkThreshold: om growHeadroom.
+	om setShrinkThreshold: om growHeadroom.
 	om attemptToShrink.
 	self assert: om segmentManager numSegments = 1
 ]

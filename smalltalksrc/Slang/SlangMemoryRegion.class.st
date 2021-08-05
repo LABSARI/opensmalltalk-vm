@@ -73,12 +73,6 @@ SlangMemoryRegion >> memory [
 ]
 
 { #category : #accessing }
-SlangMemoryRegion >> memory: anObject [
-
-	memory := anObject
-]
-
-{ #category : #accessing }
 SlangMemoryRegion >> originallyRequestedMemory [
 
 	^ originallyRequestedMemory
@@ -106,6 +100,12 @@ SlangMemoryRegion >> replaceFrom: anInteger to: anInteger2 with: aCArray startin
 SlangMemoryRegion >> requestedMemoryCopy [
 	
 	^ memory copyFrom: 1 to: originallyRequestedMemory
+]
+
+{ #category : #accessing }
+SlangMemoryRegion >> setMemory: anObject [
+
+	memory := anObject
 ]
 
 { #category : #accessing }

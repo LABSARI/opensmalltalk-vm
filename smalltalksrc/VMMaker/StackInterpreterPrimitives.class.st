@@ -2805,7 +2805,7 @@ StackInterpreterPrimitives >> primitiveSetVMParameter: index arg: argOop [
 				 primFailCode := objectMemory tenuringThreshold: arg].
 		[11] ->	[arg >= 0 ifTrue:
 					[result := objectMemory integerObjectOf: objectMemory statTenures.
-					 objectMemory statTenures: arg.
+					 objectMemory setStatTenures: arg.
 					 self initPrimCall]].
 		[17] ->	[(SistaVM and: [self isCog]) ifTrue:
 					[result := objectMemory floatObjectOf: self getCogCodeZoneThreshold.
@@ -2815,7 +2815,7 @@ StackInterpreterPrimitives >> primitiveSetVMParameter: index arg: argOop [
 				 self initPrimCall].
 		[24] ->	[arg > 0 ifTrue:
 					[result := objectMemory integerObjectOf: objectMemory shrinkThreshold.
-					 objectMemory shrinkThreshold: arg.
+					 objectMemory setShrinkThreshold: arg.
 					 self initPrimCall]].
 		[25] ->	[arg > 0 ifTrue:
 					[result := objectMemory integerObjectOf: objectMemory growHeadroom.

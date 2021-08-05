@@ -58,11 +58,11 @@ VMTStackFrame >> memory [
 ]
 
 { #category : #accessing }
-VMTStackFrame >> memory: anObject [
-	memory := anObject
+VMTStackFrame >> method [
+	^ self interpreter frameMethod: framePointer
 ]
 
 { #category : #accessing }
-VMTStackFrame >> method [
-	^ self interpreter frameMethod: framePointer
+VMTStackFrame >> setMemory: anObject [
+	memory := anObject
 ]

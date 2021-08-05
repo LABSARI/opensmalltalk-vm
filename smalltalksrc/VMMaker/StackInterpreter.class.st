@@ -13480,8 +13480,8 @@ StackInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: i
 	headerSize			:= self getWord32FromFile: f swap: swapBytes.
 	dataSize			:= self getLongFromFile: f swap: swapBytes.
 	oldBaseAddr		:= self getLongFromFile: f swap: swapBytes.
-	objectMemory specialObjectsOop: (self getLongFromFile: f swap: swapBytes).
-	objectMemory lastHash: (self getLongFromFile: f swap: swapBytes). "N.B.  not used."
+	objectMemory setSpecialObjectsOop: (self getLongFromFile: f swap: swapBytes).
+	objectMemory setLastHash: (self getLongFromFile: f swap: swapBytes). "N.B.  not used."
 	savedWindowSize	:= self getLongFromFile: f swap: swapBytes.
 	headerFlags		:= self getLongFromFile: f swap: swapBytes.
 	self setImageHeaderFlagsFrom: headerFlags.
@@ -13503,7 +13503,7 @@ StackInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: i
 	 It is used for the cog code size in Cog.  Preserve it to be polite to other VMs."
 	theUnknownShort	:= self getShortFromFile: f swap: swapBytes.
 	hdrEdenBytes		:= self getWord32FromFile: f swap: swapBytes.
-	objectMemory edenBytes: (desiredEdenBytes ~= 0
+	objectMemory setEdenBytes: (desiredEdenBytes ~= 0
 						ifTrue: [desiredEdenBytes]
 						ifFalse:
 							[hdrEdenBytes = 0
@@ -13517,7 +13517,7 @@ StackInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: i
 	 Preserve it to be polite to other VMs."
 	the2ndUnknownShort	:= self getShortFromFile: f swap: swapBytes.
 	firstSegSize := self getLongFromFile: f swap: swapBytes.
-	objectMemory firstSegmentSize: firstSegSize.
+	objectMemory setFirstSegmentSize: firstSegSize.
 	"compare memory requirements with availability"
 	allocationReserve := self interpreterAllocationReserveBytes.
 	minimumMemory := dataSize
@@ -13547,7 +13547,7 @@ StackInterpreter >> readImageFromFile: f HeapSize: desiredHeapSize StartingAt: i
 				[self insufficientMemorySpecifiedError]].
 
 	"allocate a contiguous block of memory for the Squeak heap"
-	objectMemory memory: (self
+	objectMemory setMemory: (self
 								allocateMemory: heapSize
 								minimum: minimumMemory
 								imageFile: f
@@ -14538,7 +14538,7 @@ StackInterpreter >> setSignalLowSpaceFlagAndSaveProcess [
 		[self printCallStack.
 		 self printAllStacks].
 	objectMemory signalLowSpace: true.
-	objectMemory lowSpaceThreshold: 0. "disable additional interrupts until lowSpaceThreshold is reset by image"
+	objectMemory setLowSpaceThreshold: 0. "disable additional interrupts until lowSpaceThreshold is reset by image"
 	lastSavedProcess := objectMemory splObj: ProcessSignalingLowSpace.
 	lastSavedProcess = objectMemory nilObject ifTrue:
 		[activeProc := self activeProcess.

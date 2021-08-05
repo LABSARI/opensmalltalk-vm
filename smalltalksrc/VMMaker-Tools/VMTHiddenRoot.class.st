@@ -36,11 +36,6 @@ VMTHiddenRoot >> memory [
 ]
 
 { #category : #accessing }
-VMTHiddenRoot >> memory: anObject [
-	memory := anObject
-]
-
-{ #category : #accessing }
 VMTHiddenRoot >> oop [
 	^ oop
 ]
@@ -48,4 +43,9 @@ VMTHiddenRoot >> oop [
 { #category : #accessing }
 VMTHiddenRoot >> oop: anObject [
 	oop := anObject
+]
+
+{ #category : #accessing }
+VMTHiddenRoot >> setMemory: anObject [
+	memory := anObject
 ]

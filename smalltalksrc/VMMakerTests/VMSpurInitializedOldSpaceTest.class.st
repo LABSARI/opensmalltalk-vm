@@ -128,7 +128,7 @@ VMSpurInitializedOldSpaceTest >> setUp [
 	super setUp.
 	self initializeOldSpaceForScavenger.
 	self initializeOldSpaceForFullGC.
-	memory lastHash: 1.
+	memory setLastHash: 1.
 ]
 
 { #category : #helpers }

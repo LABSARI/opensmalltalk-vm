@@ -25,7 +25,7 @@ SlangMemoryManager >> allocate: desiredSize [
 	newMemory pinInMemory.
 	newMemoryRegion := SlangMemoryRegion new
 		start: allocatedAddress;
-		memory: newMemory;
+		setMemory: newMemory;
 		originallyRequestedMemory: desiredSize;
 		yourself.
 	

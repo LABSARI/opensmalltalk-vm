@@ -388,12 +388,6 @@ UnicornSimulator >> memory [
 	^ memory
 ]
 
-{ #category : #accessing }
-UnicornSimulator >> memory: aSpur64BitMMLECoSimulator [
-	
-	memory := aSpur64BitMMLECoSimulator 
-]
-
 { #category : #memory }
 UnicornSimulator >> memoryAt: address readNext: byteSize [
 	
@@ -582,6 +576,12 @@ UnicornSimulator >> sendNumberOfArgumentsRegisterValue [
 UnicornSimulator >> sendNumberOfArgumentsRegisterValue: aValue [
 
 	^ self writeRegister: self sendNumberOfArgumentsRegister value: aValue
+]
+
+{ #category : #accessing }
+UnicornSimulator >> setMemory: aSpur64BitMMLECoSimulator [
+	
+	memory := aSpur64BitMMLECoSimulator 
 ]
 
 { #category : #'as yet unclassified' }

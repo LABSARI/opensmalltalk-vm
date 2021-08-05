@@ -469,7 +469,7 @@ VMClass >> alloca: desiredSize [
 	^ CNewArrayAccessor new
 		setObject: (SlangMemoryRegion new
 			start: address;
-			memory: (ByteArray new: desiredSize);
+			setMemory: (ByteArray new: desiredSize);
 			originallyRequestedMemory: desiredSize;
 			yourself);
 		address: address;

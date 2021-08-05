@@ -3900,7 +3900,7 @@ InterpreterPrimitives >> primitiveSignalAtBytesLeft [
 	bytes := self stackTop.
 	((objectMemory isIntegerObject: bytes)
 	 and: [(bytes := objectMemory integerValueOf: bytes) >= 0])
-		ifTrue: [objectMemory lowSpaceThreshold: bytes. self pop: 1]
+		ifTrue: [objectMemory setLowSpaceThreshold: bytes. self pop: 1]
 		ifFalse: [self primitiveFailFor: PrimErrBadArgument]
 ]
 

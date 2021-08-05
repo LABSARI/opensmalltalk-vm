@@ -36,6 +36,6 @@ VMAbstractBuilder >> memory [
 ]
 
 { #category : #accessing }
-VMAbstractBuilder >> memory: anObject [
+VMAbstractBuilder >> setMemory: anObject [
 	memory := anObject
 ]

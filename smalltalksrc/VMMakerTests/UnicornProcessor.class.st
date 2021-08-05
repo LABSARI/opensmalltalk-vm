@@ -96,7 +96,7 @@ UnicornProcessor >> initializeStackFor: aCompiler [
 	
 	"Initialize the machine code simulator"
 	machineSimulator := UnicornSimulator perform: aCompiler backend class ISA asSymbol.
-	machineSimulator memory: aCompiler objectMemory.
+	machineSimulator setMemory: aCompiler objectMemory.
 	machineSimulator mapMemoryInManager: aCompiler objectMemory memoryManager.
 	
 	"As for the ARMv8 Arm® Architecture Reference Manual

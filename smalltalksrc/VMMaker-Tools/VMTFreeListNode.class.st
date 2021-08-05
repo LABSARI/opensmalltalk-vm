@@ -13,7 +13,7 @@ VMTFreeListNode class >> on: anOop memory: aMemory [
 	
 	anOop = 0 ifTrue: [ self halt ].
 	^ self new
-		memory: aMemory;
+		setMemory: aMemory;
 		nodeOop: anOop;
 		yourself
 ]
@@ -52,11 +52,6 @@ VMTFreeListNode >> memory [
 ]
 
 { #category : #accessing }
-VMTFreeListNode >> memory: anObject [
-	memory := anObject
-]
-
-{ #category : #accessing }
 VMTFreeListNode >> nextOop [
 
 	^ memory
@@ -89,6 +84,11 @@ VMTFreeListNode >> printOn: aStream [
 		nextPutAll: 'FreeTreeNode(';
 		nextPutAll: nodeOop hex;
 		nextPutAll: ')'
+]
+
+{ #category : #accessing }
+VMTFreeListNode >> setMemory: anObject [
+	memory := anObject
 ]
 
 { #category : #accessing }

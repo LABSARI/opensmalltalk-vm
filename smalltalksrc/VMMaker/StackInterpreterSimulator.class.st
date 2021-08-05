@@ -1631,8 +1631,8 @@ StackInterpreterSimulator >> openOn: fileName extraMemory: extraBytes [
 	headerSize := self getWord32FromFile: f swap: swapBytes.
 	dataSize := self getLongFromFile: f swap: swapBytes.  "length of heap in file"
 	oldBaseAddr := self getLongFromFile: f swap: swapBytes.  "object memory base address of image"
-	objectMemory specialObjectsOop: (self getLongFromFile: f swap: swapBytes).
-	objectMemory lastHash: (self getLongFromFile: f swap: swapBytes).  "Should be loaded from, and saved to the image header"
+	objectMemory setSpecialObjectsOop: (self getLongFromFile: f swap: swapBytes).
+	objectMemory setLastHash: (self getLongFromFile: f swap: swapBytes).  "Should be loaded from, and saved to the image header"
 
 	savedWindowSize	:= self getLongFromFile: f swap: swapBytes.
 	headerFlags		:= self getLongFromFile: f swap: swapBytes.
@@ -1653,7 +1653,7 @@ StackInterpreterSimulator >> openOn: fileName extraMemory: extraBytes [
 	theUnknownShort	:= self getShortFromFile: f swap: swapBytes.
 	self assert: f position = (objectMemory wordSize = 4 ifTrue: [40] ifFalse: [64]).
 	hdrEdenBytes		:= self getWord32FromFile: f swap: swapBytes.
-	objectMemory edenBytes: (hdrEdenBytes = 0
+	objectMemory setEdenBytes: (hdrEdenBytes = 0
 							ifTrue: [objectMemory defaultEdenBytes]
 							ifFalse: [hdrEdenBytes]).
 	desiredEdenBytes := hdrEdenBytes.
@@ -1665,7 +1665,7 @@ StackInterpreterSimulator >> openOn: fileName extraMemory: extraBytes [
 	the2ndUnknownShort	:= self getShortFromFile: f swap: swapBytes.
 	self assert: f position = (objectMemory wordSize = 4 ifTrue: [48] ifFalse: [72]).
 	firstSegSize := self getLongFromFile: f swap: swapBytes.
-	objectMemory firstSegmentSize: firstSegSize.
+	objectMemory setFirstSegmentSize: firstSegSize.
 	"compare memory requirements with availability"
 	allocationReserve := self interpreterAllocationReserveBytes.
 	objectMemory hasSpurMemoryManagerAPI

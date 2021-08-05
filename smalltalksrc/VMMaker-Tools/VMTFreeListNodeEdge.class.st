@@ -13,7 +13,7 @@ Class {
 VMTFreeListNodeEdge class >> memory: aMemory label: aLabel oop: anOop [
 	
 	^ self new
-		memory: aMemory;
+		setMemory: aMemory;
 		label: aLabel;
 		nodeOop: anOop;
 		yourself
@@ -53,11 +53,6 @@ VMTFreeListNodeEdge >> memory [
 ]
 
 { #category : #accessing }
-VMTFreeListNodeEdge >> memory: anObject [
-	memory := anObject
-]
-
-{ #category : #accessing }
 VMTFreeListNodeEdge >> nodeOop [
 	^ nodeOop
 ]
@@ -74,6 +69,11 @@ VMTFreeListNodeEdge >> printOn: aStream [
 		nextPutAll: label;
 		nextPutAll: ' -> ';
 		nextPutAll: nodeOop hex
+]
+
+{ #category : #accessing }
+VMTFreeListNodeEdge >> setMemory: anObject [
+	memory := anObject
 ]
 
 { #category : #accessing }

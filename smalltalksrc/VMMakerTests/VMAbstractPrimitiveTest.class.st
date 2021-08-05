@@ -177,5 +177,5 @@ VMAbstractPrimitiveTest >> setUp [
 		ofObject: memory classTableFirstPage
 		withValue: classLargeNegativeInteger.
 
-	memory lastHash: 1
+	memory setLastHash: 1
 ]

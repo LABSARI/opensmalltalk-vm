@@ -4447,11 +4447,6 @@ SpurMemoryManager >> edenBytes [
 	^scavenger edenBytes
 ]
 
-{ #category : #accessing }
-SpurMemoryManager >> edenBytes: bytes [
-	edenBytes := bytes
-]
-
 { #category : #instantiation }
 SpurMemoryManager >> eeInstantiateClassIndex: knownClassIndex format: objFormat numSlots: numSlots [
 	"Instantiate an instance of a compact class.  ee stands for execution engine and
@@ -5124,14 +5119,6 @@ SpurMemoryManager >> firstSegmentBytes [
 	^segmentManager firstSegmentBytes
 ]
 
-{ #category : #snapshot }
-SpurMemoryManager >> firstSegmentSize: firstSegmentSize [
-	<doNotGenerate>
-	"even an empty segment needs a bridge ;-)"
-	self assert: firstSegmentSize >= (2 * self baseHeaderSize).
-	segmentManager firstSegmentSize: firstSegmentSize
-]
-
 { #category : #'header formats' }
 SpurMemoryManager >> firstShortFormat [
 	<api>
@@ -5251,7 +5238,7 @@ SpurMemoryManager >> flushNewSpaceInstancesOf: aClass [
 	classIndex := self rawHashBitsOf: aClass.
 	classIndex = 0 ifTrue: "no instances; nothing to do"
 		[^self].
-	scavenger tenuringClassIndex: classIndex.
+	scavenger setTenuringClassIndex: classIndex.
 	self scavengingGCTenuringIf: TenureByClass.
 	self assert: (self existInstancesInNewSpaceOf: aClass) not
 ]
@@ -5801,7 +5788,7 @@ SpurMemoryManager >> garbageCollectForSnapshot [
 	self flag: 'If we wanted to shrink the rememberedSet prior to snapshot this is the place to do it.'.
 	compactor biasForSnapshot.
 	self fullGC.
-	compactor biasForGC.
+	compactor setBiasForGC.
 	segmentManager prepareForSnapshot.
 	self checkFreeSpace: GCModeFull
 ]
@@ -6600,7 +6587,7 @@ SpurMemoryManager >> initializeObjectMemory: bytesToShift [
 	self initializeNewSpaceVariables.
 	scavenger initializeRememberedSet.
 	segmentManager checkSegments.
-	compactor biasForGC.
+	compactor setBiasForGC.
 
 	"These defaults should depend on machine size; e.g. too small on a powerful laptop, too big on a Pi."
 	growHeadroom := 16*1024*1024.		"headroom when growing"
@@ -7862,11 +7849,6 @@ SpurMemoryManager >> lastHash [
 	^lastHash
 ]
 
-{ #category : #accessing }
-SpurMemoryManager >> lastHash: seed [
-	lastHash := seed
-]
-
 { #category : #'header formats' }
 SpurMemoryManager >> lastPointerFormat [
 	^5
@@ -8220,18 +8202,6 @@ SpurMemoryManager >> lookupAddress: address [
 				, ((self lookupAddress: (self fetchPointer: KeyIndex ofObject: address)) ifNil: [''])
 				, ((self lookupAddress: (self fetchPointer: ValueIndex ofObject: address)) ifNil: [''] ifNotNil: [:val| ' -> ', val])].
 		'a(n) ', maybeClassName allButFirst]
-]
-
-{ #category : #'free space' }
-SpurMemoryManager >> lowSpaceThreshold: threshold [
-	lowSpaceThreshold := threshold.
-	"N.B. The threshold > 0 guard eliminates a warning when
-		self lowSpaceThreshold: 0
-	 is inlined into setSignalLowSpaceFlagAndSaveProcess"
-	(threshold > 0
-	 and: [totalFreeOldSpace < threshold]) ifTrue:
-		[self growOldSpaceByAtLeast: threshold - totalFreeOldSpace].
-	self assert: totalFreeOldSpace >= lowSpaceThreshold
 ]
 
 { #category : #'gc - global' }
@@ -8875,11 +8845,6 @@ SpurMemoryManager >> memmove: destAddress _: sourceAddress _: bytes [
 SpurMemoryManager >> memory [
 	<cmacro: '() GIV(memory)'>
 	^memory
-]
-
-{ #category : #accessing }
-SpurMemoryManager >> memory: aValue [
-	^memory := aValue
 ]
 
 { #category : #accessing }
@@ -11504,6 +11469,11 @@ SpurMemoryManager >> setCurrentAllocatedBytesTo: n [
 	self assert: self currentAllocatedBytes = n
 ]
 
+{ #category : #accessing }
+SpurMemoryManager >> setEdenBytes: bytes [
+	edenBytes := bytes
+]
+
 { #category : #snapshot }
 SpurMemoryManager >> setEndOfMemory: newEndOfMemory [
 	"Set by the segment manager after swizzling the image,
@@ -11511,6 +11481,14 @@ SpurMemoryManager >> setEndOfMemory: newEndOfMemory [
 	endOfMemory := newEndOfMemory.
 	freeOldSpaceStart > newEndOfMemory ifTrue:
 		[freeOldSpaceStart := newEndOfMemory]
+]
+
+{ #category : #snapshot }
+SpurMemoryManager >> setFirstSegmentSize: firstSegmentSize [
+	<doNotGenerate>
+	"even an empty segment needs a bridge ;-)"
+	self assert: firstSegmentSize >= (2 * self baseHeaderSize).
+	segmentManager setFirstSegmentSize: firstSegmentSize
 ]
 
 { #category : #'header access' }
@@ -11649,6 +11627,11 @@ SpurMemoryManager >> setIsRememberedOf: objOop to: aBoolean [
 	self subclassResponsibility
 ]
 
+{ #category : #accessing }
+SpurMemoryManager >> setLastHash: seed [
+	lastHash := seed
+]
+
 { #category : #'growing/shrinking memory' }
 SpurMemoryManager >> setLastSegment: segInfo [
 	"Update after removing a segment.
@@ -11663,12 +11646,29 @@ SpurMemoryManager >> setLastSegment: segInfo [
 			[freeOldSpaceStart :=currentEnd]]
 ]
 
+{ #category : #'free space' }
+SpurMemoryManager >> setLowSpaceThreshold: threshold [
+	lowSpaceThreshold := threshold.
+	"N.B. The threshold > 0 guard eliminates a warning when
+		self lowSpaceThreshold: 0
+	 is inlined into setSignalLowSpaceFlagAndSaveProcess"
+	(threshold > 0
+	 and: [totalFreeOldSpace < threshold]) ifTrue:
+		[self growOldSpaceByAtLeast: threshold - totalFreeOldSpace].
+	self assert: totalFreeOldSpace >= lowSpaceThreshold
+]
+
 { #category : #accessing }
 SpurMemoryManager >> setMaxOldSpaceSize: limit [
 	<api>
 	<var: #limit type: #usqInt>
 	maxOldSpaceSize := limit.
 	^0
+]
+
+{ #category : #accessing }
+SpurMemoryManager >> setMemory: aValue [
+	^memory := aValue
 ]
 
 { #category : #'free space' }
@@ -11708,9 +11708,26 @@ SpurMemoryManager >> setObjectFree: objOop [
 	self setFree: objOop
 ]
 
+{ #category : #'free space' }
+SpurMemoryManager >> setShrinkThreshold: aValue [
+	shrinkThreshold := aValue
+]
+
+{ #category : #accessing }
+SpurMemoryManager >> setSpecialObjectsOop: anObject [
+	"For mapInterpreterOops"
+	specialObjectsOop := anObject
+]
+
 { #category : #accessing }
 SpurMemoryManager >> setStatMaxAllocSegmentTime: aValue [
 	statMaxAllocSegmentTime := aValue
+]
+
+{ #category : #accessing }
+SpurMemoryManager >> setStatTenures: aValue [
+	<doNotGenerate>
+	scavenger setStatTenures: aValue
 ]
 
 { #category : #accessing }
@@ -11792,11 +11809,6 @@ SpurMemoryManager >> showDisplayBits: aForm Left: l Top: t Right: r Bottom: b [
 { #category : #'free space' }
 SpurMemoryManager >> shrinkThreshold [
 	^shrinkThreshold
-]
-
-{ #category : #'free space' }
-SpurMemoryManager >> shrinkThreshold: aValue [
-	shrinkThreshold := aValue
 ]
 
 { #category : #'gc - incremental' }
@@ -12009,12 +12021,6 @@ SpurMemoryManager >> smallObjectBytesForSlots: numSlots [
 { #category : #accessing }
 SpurMemoryManager >> specialObjectsOop [
 	^specialObjectsOop
-]
-
-{ #category : #accessing }
-SpurMemoryManager >> specialObjectsOop: anObject [
-	"For mapInterpreterOops"
-	specialObjectsOop := anObject
 ]
 
 { #category : #'interpreter access' }
@@ -12298,12 +12304,6 @@ SpurMemoryManager >> statSweepUsecs [
 SpurMemoryManager >> statTenures [
 	<doNotGenerate>
 	^scavenger statTenures
-]
-
-{ #category : #accessing }
-SpurMemoryManager >> statTenures: aValue [
-	<doNotGenerate>
-	scavenger statTenures: aValue
 ]
 
 { #category : #'object access' }

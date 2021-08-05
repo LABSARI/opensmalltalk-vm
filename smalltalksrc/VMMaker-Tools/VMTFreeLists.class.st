@@ -11,7 +11,7 @@ Class {
 VMTFreeLists class >> on: aMemory [
 
 	^ self new
-		memory: aMemory;
+		setMemory: aMemory;
 		yourself
 ]
 
@@ -28,6 +28,6 @@ VMTFreeLists >> children [
 ]
 
 { #category : #accessing }
-VMTFreeLists >> memory: aMemory [
+VMTFreeLists >> setMemory: aMemory [
 	memory := aMemory
 ]

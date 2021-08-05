@@ -317,7 +317,7 @@ VMSimpleStackBasedCogitAbstractTest >> createSpecialSelectorArray [
 		storePointer: selectorIndex
 		ofObject: obj withValue: (memory integerObjectOf: sentSelector numArgs).
 	memory storePointer: 23 ofObject: specialObjectsOop withValue: obj.
-	memory specialObjectsOop: specialObjectsOop.
+	memory setSpecialObjectsOop: specialObjectsOop.
 ]
 
 { #category : #helpers }
@@ -767,7 +767,7 @@ VMSimpleStackBasedCogitAbstractTest >> setUp [
 VMSimpleStackBasedCogitAbstractTest >> setUpCPUSimulator [
 
 	machineSimulator := UnicornSimulator perform: isa asSymbol.
-	machineSimulator memory: memory.
+	machineSimulator setMemory: memory.
 	memory memory memoryObject pinInMemory.
 	machineSimulator mapMemory: memory memory memoryObject at: initialAddress.
 ]

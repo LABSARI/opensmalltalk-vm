@@ -11,7 +11,7 @@ Class {
 VMTHiddenRootTable class >> on: aMemory [ 
 
 	^ self new
-		memory: aMemory;
+		setMemory: aMemory;
 		yourself
 ]
 
@@ -22,7 +22,7 @@ VMTHiddenRootTable >> children [
 	1 to: memory classTableRootSlots do: [ :index | | oop |
 		oop := memory fetchPointer: index - 1 ofObject: memory hiddenRootsObject.
 		roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: index;
 			label: 'Class Table Page ', index asString;
 			oop: oop;
@@ -30,35 +30,35 @@ VMTHiddenRootTable >> children [
 	].
 
 	roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: 4096;
 			label: 'Mark Stack';
 			oop: (memory fetchPointer: 4096 ofObject: memory hiddenRootsObject);
 			yourself).
 
 	roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: 4097;
 			label: 'Weakling Stack';
 			oop: (memory fetchPointer: 4097 ofObject: memory hiddenRootsObject);
 			yourself).
 
 	roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: 4097;
 			label: 'Weakling Stack';
 			oop: (memory fetchPointer: 4097 ofObject: memory hiddenRootsObject);
 			yourself).
 
 	roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: 4098;
 			label: 'Mourn Queue';
 			oop: (memory fetchPointer: 4098 ofObject: memory hiddenRootsObject);
 			yourself).
 			
 	roots add: (VMTHiddenRoot new
-			memory: memory;
+			setMemory: memory;
 			index: 4099;
 			label: 'Remembered Set';
 			oop: (memory fetchPointer: 4099 ofObject: memory hiddenRootsObject);
@@ -68,6 +68,6 @@ VMTHiddenRootTable >> children [
 ]
 
 { #category : #accessing }
-VMTHiddenRootTable >> memory: aMemory [ 
+VMTHiddenRootTable >> setMemory: aMemory [ 
 	memory := aMemory
 ]

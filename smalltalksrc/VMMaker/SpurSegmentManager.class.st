@@ -291,12 +291,6 @@ SpurSegmentManager >> firstSegmentBytes [
 	^(segments at: 0) segSize
 ]
 
-{ #category : #initialization }
-SpurSegmentManager >> firstSegmentSize: firstSegSize [
-	"Remember firstSegSize for subsequent image segment parsing."
-	firstSegmentSize := firstSegSize
-]
-
 { #category : #'growing/shrinking memory' }
 SpurSegmentManager >> indexOfSegment: seg [
 	<var: #seg type: #'SpurSegmentInfo *'>
@@ -683,6 +677,12 @@ SpurSegmentManager >> segmentOverlap [
 SpurSegmentManager >> segments [
 	<cmacro: '() GIV(segments)'>
 	^segments
+]
+
+{ #category : #initialization }
+SpurSegmentManager >> setFirstSegmentSize: firstSegSize [
+	"Remember firstSegSize for subsequent image segment parsing."
+	firstSegmentSize := firstSegSize
 ]
 
 { #category : #'growing/shrinking memory' }

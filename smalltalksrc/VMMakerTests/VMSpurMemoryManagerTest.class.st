@@ -104,7 +104,7 @@ VMSpurMemoryManagerTest >> initializeOldSpaceForFullGC [
 	memory ensureBehaviorHash: ourArrayClass.
 	
 	memory storePointer: 16 ofObject: memory classTableFirstPage withValue: ourArrayClass.
-	memory shrinkThreshold: 0.
+	memory setShrinkThreshold: 0.
 	memory growHeadroom: 10*1024*1024.
 	
 	memory flushNewSpace.
@@ -141,7 +141,7 @@ VMSpurMemoryManagerTest >> initializeOldSpaceForScavenger [
 	memory coInterpreter profileMethod: memory nilObject.
 	memory coInterpreter profileSemaphore: memory nilObject.
 	memory mournQueue: memory nilObject.
-	memory specialObjectsOop: memory nilObject.
+	memory setSpecialObjectsOop: memory nilObject.
 		
 	freeListOop := memory initializeFreeListInOldSpace: true.
 	memory initializeFreeSpacePostLoad: freeListOop.
@@ -158,7 +158,7 @@ VMSpurMemoryManagerTest >> initializeOldSpaceForScavenger [
 	memory scavenger initializeRememberedSet.
 	memory scavenger remember: memory hiddenRootsObject.
 	memory scavenger remember: firstClassTablePage. 
-	memory specialObjectsOop: (self newObjectWithSlots: 60).
+	memory setSpecialObjectsOop: (self newObjectWithSlots: 60).
 	
 	memory scavengingGCTenuringIf: 1.
 	self deny: memory needGCFlag.
@@ -497,12 +497,12 @@ VMSpurMemoryManagerTest >> setUp [
 	
 	methodBuilder := VMMethodBuilder new
 		interpreter: interpreter; 
-		memory: memory;
+		setMemory: memory;
 		yourself.
 
 	stackBuilder := VMStackBuilder new
 		interpreter: interpreter; 
-		memory: memory;
+		setMemory: memory;
 		methodBuilder: methodBuilder;
 		yourself.
 ]
@@ -525,7 +525,7 @@ VMSpurMemoryManagerTest >> setUpScheduler [
 	memory splObj: SchedulerAssociation put: processorOopAssociation.
 	memory storePointer: ValueIndex ofObject: processorOopAssociation withValue: processorOop.
 	memory storePointer: ProcessListsIndex ofObject: processorOop withValue: processorListArray.
-	memory lastHash: 1.
+	memory setLastHash: 1.
 	
 	activeProcessOop := self newObjectWithSlots: 4 "Creates the active process".
 	memory 
@@ -562,12 +562,12 @@ VMSpurMemoryManagerTest >> setUpUsingImage [
 	
 	methodBuilder := VMMethodBuilder new
 		interpreter: interpreter; 
-		memory: memory;
+		setMemory: memory;
 		yourself.
 
 	stackBuilder := VMStackBuilder new
 		interpreter: interpreter; 
-		memory: memory;
+		setMemory: memory;
 		methodBuilder: methodBuilder;
 		yourself.
 		
