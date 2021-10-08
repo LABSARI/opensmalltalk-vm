@@ -200,6 +200,38 @@ SlangLocalizationTestCase >> testExternalCallReadingOnlyVariableShouldNotEscapeC
 ]
 
 { #category : #tests }
+SlangLocalizationTestCase >> testExternalCallUsingStringCCodeShouldExternalizeAndInternalizeAllLocalizedVariables [
+	
+	| interpretMethod printedString |
+	MockLocalizationInterpreterMock.
+	ccg addClass: MockLocalizationInterpreterMock.
+	
+	"Prepare methods will replace the bytecode dispatch instruction into a dispatch switch"
+	ccg prepareMethods.
+	ccg inlineDispatchesInMethodNamed: #interpretWithExternalCallUsingCCodeBeforeDispatch.
+
+
+	"Assert that the send node is preceded by variable externalization"
+	interpretMethod := ccg methodNamed: #interpretWithExternalCallUsingCCodeBeforeDispatch.
+	
+	printedString := String streamContents: [ :str | (interpretMethod parseTree statements fifth asCASTIn: ccg) prettyPrintOn: str ].
+	
+	self assert: printedString equals: '{
+	{
+		autoLocalizedVariable2 = local_autoLocalizedVariable2;
+		autoLocalizedVariable3 = local_autoLocalizedVariable3;
+		autoLocalizedVariable = local_autoLocalizedVariable;
+		autoLocalizedVariable4 = local_autoLocalizedVariable4;
+		nonInlinedMethodUsingAutolocalizedVariableInStringCCode();
+		local_autoLocalizedVariable2 = autoLocalizedVariable2;
+		local_autoLocalizedVariable3 = autoLocalizedVariable3;
+		local_autoLocalizedVariable = autoLocalizedVariable;
+		local_autoLocalizedVariable4 = autoLocalizedVariable4;
+	}
+}'
+]
+
+{ #category : #tests }
 SlangLocalizationTestCase >> testExternalEscapingSendNodeShouldBeTranslatedWithExternalizationAndInternalization [
 	
 	| interpretMethod case inlinedMethod externalCall cast printedString |
@@ -497,4 +529,34 @@ SlangLocalizationTestCase >> testNoExternalSendNodeOnSafeExternalCall [
 	printedString := String streamContents: [ :str | cast prettyPrintOn: str ].
 	
 	self assert: printedString equals: 'nonInlinedMethodNotUsingAutolocalizedVariables((local_autoLocalizedVariable += 1))'
+]
+
+{ #category : #tests }
+SlangLocalizationTestCase >> testStringCCodeShouldBeExternalizedAndInternalizedWithAllLocalizedVariables [
+	
+	| interpretMethod printedString |
+	MockLocalizationInterpreterMock.
+	ccg addClass: MockLocalizationInterpreterMock.
+	
+	"Prepare methods will replace the bytecode dispatch instruction into a dispatch switch"
+	ccg prepareMethods.
+	ccg inlineDispatchesInMethodNamed: #interpretWithExternalCallUsingCCodeBeforeDispatch.
+
+
+	"Assert that the send node is preceded by variable externalization"
+	interpretMethod := ccg methodNamed: #interpretWithExternalCallUsingCCodeBeforeDispatch.
+	
+	printedString := String streamContents: [ :str | (interpretMethod parseTree statements seventh asCASTIn: ccg) prettyPrintOn: str ].
+	
+	self assert: printedString equals: '{
+	autoLocalizedVariable4 = local_autoLocalizedVariable4;
+	autoLocalizedVariable2 = local_autoLocalizedVariable2;
+	autoLocalizedVariable = local_autoLocalizedVariable;
+	autoLocalizedVariable3 = local_autoLocalizedVariable3;
+	nil;
+	local_autoLocalizedVariable4 = autoLocalizedVariable4;
+	local_autoLocalizedVariable2 = autoLocalizedVariable2;
+	local_autoLocalizedVariable = autoLocalizedVariable;
+	local_autoLocalizedVariable3 = autoLocalizedVariable3;
+}'
 ]

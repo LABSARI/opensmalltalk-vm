@@ -3178,7 +3178,10 @@ TMethod >> variablesUpdatedFrom: variablesCollection [
 	parseTree nodesDo: [ :node | 
 		(node isAssignment and: [ 
 			 variablesCollection includes: node variable name ]) ifTrue: [ 
-			refs add: node variable name asString ] ].
+			refs add: node variable name asString ].
+		(node isSend and: [ 
+			 #( #cCode: #cCode:inSmalltalk: ) includes: node selector ]) 
+			ifTrue: [ ^ variablesCollection ] ].
 	^ refs
 ]
 

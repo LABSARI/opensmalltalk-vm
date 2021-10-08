@@ -17,6 +17,14 @@ TExternalSendNode class >> send: aWrappedSendNode variableBindings: bindings [
 		yourself
 ]
 
+{ #category : #comparing }
+TExternalSendNode >> = aNode [
+
+	^ aNode isExternalSend and: [ 
+		  wrappedSendNode = aNode wrappedSendNode and: [ 
+			  variableBindings = aNode variableBindings ] ]
+]
+
 { #category : #tranforming }
 TExternalSendNode >> asCASTIn: aCodeGenerator [
 

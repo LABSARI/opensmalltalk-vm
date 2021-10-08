@@ -193,6 +193,18 @@ MockLocalizationInterpreterMock >> interpretWithExternalCallBeforeDispatch [
 ]
 
 { #category : #inline }
+MockLocalizationInterpreterMock >> interpretWithExternalCallUsingCCodeBeforeDispatch [
+	
+	<localizedVariable: #autoLocalizedVariable>
+	<localizedVariable: #autoLocalizedVariable2>
+	<localizedVariable: #autoLocalizedVariable3>
+	<localizedVariable: #autoLocalizedVariable4>
+	self nonInlinedMethodUsingAutolocalizedVariableInStringCCode.
+	self dispatchOn: 1 in: BytecodeTable.
+	self cCode: 'nil'
+]
+
+{ #category : #inline }
 MockLocalizationInterpreterMock >> interpretWithLocalizedVariableConflict [
 
 	"This method should create a conflict with automatically inlined arguments"
@@ -265,4 +277,11 @@ MockLocalizationInterpreterMock >> nonInlinedMethodUsingAutolocalizedVariable [
 
 	<inline:false>
 	^ autoLocalizedVariable
+]
+
+{ #category : #'interpreter shell' }
+MockLocalizationInterpreterMock >> nonInlinedMethodUsingAutolocalizedVariableInStringCCode [
+
+	<inline:false>
+	self cCode: 'autoLocalizedVariable = 10'
 ]

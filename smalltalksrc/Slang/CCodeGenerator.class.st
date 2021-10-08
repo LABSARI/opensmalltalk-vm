@@ -2126,19 +2126,17 @@ CCodeGenerator >> generateCASTIfTrueIfFalseAsArgument: tast [
 ]
 
 { #category : #'CAST translation' }
-CCodeGenerator >> generateCASTInlineCCode: aTSendNode [ 
+CCodeGenerator >> generateCASTInlineCCode: aTSendNode [
 
-	aTSendNode args first isConstant ifTrue: [
-		"If it is a pre-processor declaration"
-		(aTSendNode args first value at: 1 ifAbsent: nil) = $# ifTrue: [
-			"This was assuming the argument is a preprocessor directive.
-			So it was printing it in a new line"
+	aTSendNode arguments first isConstant ifTrue: [ "If it is a pre-processor declaration"
+		(aTSendNode arguments first value at: 1 ifAbsent: nil) = $# ifTrue: [ "This was assuming the argument is a preprocessor directive.
+			So it was printing it in a new line" 
 			self error: 'unsupported' ].
-			
-			self noteVariableUsageInString: aTSendNode args first value.
-			^ CRawCodeNode code: aTSendNode args first value ].
 
-	^ aTSendNode args first asCASTIn: self.
+		self noteVariableUsageInString: aTSendNode arguments first value.
+		^ CRawCodeNode code: aTSendNode arguments first value ].
+
+	^ aTSendNode arguments first asCASTIn: self
 ]
 
 { #category : #'CAST translation' }
@@ -3387,7 +3385,7 @@ CCodeGenerator >> inlineDispatchesInMethodNamed: selector [
 	"Inline dispatches (case statements) in the method with the given name.
 	Then localize variables"
 
-	| m variablesToLocalize replacementDict sendReplacements variablesToLocalizeAssociations methodsReferencesToVarsToLocalize |
+	| m variablesToLocalize replacementDict sendReplacements variablesToLocalizeAssociations |
 	(m := self methodNamed: selector) ifNil: [ ^ self ].
 
 	variablesToLocalize := Set new.
@@ -3424,8 +3422,16 @@ CCodeGenerator >> inlineDispatchesInMethodNamed: selector [
 							 send: node
 							 variableBindings:
 								 (externalVars collect: [ :var | 
-									  var -> (replacementDict at: var) ]) asDictionary) ] ] ]
+									  var -> (replacementDict at: var) ]) asDictionary) ] ].
+			(node isSend and: [ 
+				 #( #cCode: #cCode:inSmalltalk: ) includes: node selector ]) 
+				ifTrue: [ 
+					sendReplacements
+						at: node
+						put:
+						(TExternalSendNode send: node variableBindings: replacementDict) ] ]
 		unless: [ :e | e isReturn ].
+	
 	sendReplacements ifNotEmpty: [ 
 		m parseTree replaceNodesIn: sendReplacements ].
 
@@ -3696,7 +3702,7 @@ CCodeGenerator >> lineariseExternalCallsIn: aTMethod [
 	| replacementDictionary argumentAssignments newExternalSend |
 	replacementDictionary := Dictionary new.
 	aTMethod nodesDo: [ :e |
-		e isExternalSend ifTrue: [
+		(e isExternalSend and: [ self isFunctionCall: e wrappedSendNode ]) ifTrue: [
 			argumentAssignments := e wrappedSendNode arguments collectWithIndex: [ :arg :index | | variableName |
 				variableName := aTMethod declareNonConflictingLocalNamedLike: 'arg', index asString.
 				TAssignmentNode 
@@ -5183,8 +5189,11 @@ CCodeGenerator >> updatedVariablesFrom: variablesToLocalize inMethod: selector w
 	| currentMeth externalCalls updatedVariables |
 	associationDictionary at: selector ifPresent: [ :vars | ^ vars ].
 	currentMeth := self methodNamed: selector.
+	updatedVariables := currentMeth variablesUpdatedFrom:
+		                    variablesToLocalize.
+	updatedVariables size = variablesToLocalize ifTrue: [ 
+		^ updatedVariables ].
 	externalCalls := currentMeth externalCallsIn: self.
-	updatedVariables := currentMeth variablesUpdatedFrom: variablesToLocalize.
 	externalCalls ifEmpty: [ 
 		associationDictionary at: selector put: updatedVariables.
 		^ updatedVariables ].
