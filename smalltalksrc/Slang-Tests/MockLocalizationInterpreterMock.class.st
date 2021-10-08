@@ -141,7 +141,22 @@ MockLocalizationInterpreterMock >> bytecodeWithEscapingCall [
 MockLocalizationInterpreterMock >> foo2 [
 
 	<inline: false>
-	autoLocalizedVariable := 10
+	autoLocalizedVariable := self foo3.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MockLocalizationInterpreterMock >> foo3 [
+
+	<inline: false>
+	^ autoLocalizedVariable3 + self foo4
+]
+
+{ #category : #'as yet unclassified' }
+MockLocalizationInterpreterMock >> foo4 [
+
+	<inline: false>
+	^ autoLocalizedVariable4
 ]
 
 { #category : #inline }

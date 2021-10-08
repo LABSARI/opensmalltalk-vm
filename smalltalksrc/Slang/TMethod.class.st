@@ -795,31 +795,37 @@ TMethod >> ensureConditionalAssignmentsAreTransformedIn: aCodeGen [
 
 { #category : #transformations }
 TMethod >> ensureToByDoLoopLimitIsSafeAndEfficient: node in: aCodeGen [
+
 	"For both safety and efficiency, make sure that to:[by:]do: loops
 	 with complex limits have a variable to hold the limit expression.
 	 In C the limit expression is evaluated each time round the loop
 	 so if the loop has side-effects (which it usually will), the C compiler
 	 may not be able to optimize the limit expression itself."
+
 	| limitExpr hasSideEffects |
-	 limitExpr := node args first.
-	 hasSideEffects := limitExpr anySatisfy:
-						[:subNode|
-						subNode isSend
-						and: [(aCodeGen isBuiltinSelector: subNode selector) not
-						and: [(aCodeGen isStructSend: subNode) not]]].
-	 node args size = 4
-		ifTrue:
-			[hasSideEffects
-				ifTrue: [locals add: node args last name]
-				ifFalse: [node arguments: node args allButLast]]
-		ifFalse: "If the expression is complex but as yet there is no limit variable, add it"
-			[hasSideEffects ifTrue:
-				[| var |
-				 var := self unusedNamePrefixedBy: 'toDoLimit' avoiding: locals. "N.B. adds it to locals!!"
-				 node arguments: node args, {TVariableNode new setName: var; yourself}.
-				 declarations
-					at: node args third args first
-					ifPresent: [:decl| self declarationAt: var put: (self typeFor: node args third args first in: aCodeGen), ' ', var]]]
+	limitExpr := node arguments first.
+	hasSideEffects := limitExpr anySatisfy: [ :subNode | 
+		                  subNode isSend and: [ 
+			                  (aCodeGen isBuiltinSelector: subNode selector)
+				                  not and: [ (aCodeGen isStructSend: subNode) not ] ] ].
+	node arguments size = 4
+		ifTrue: [ 
+			hasSideEffects
+				ifTrue: [ locals add: node args last name ]
+				ifFalse: [ node arguments: node arguments allButLast ] ]
+		ifFalse: [ "If the expression is complex but as yet there is no limit variable, add it"
+			hasSideEffects ifTrue: [ 
+				| var |
+				var := self unusedNamePrefixedBy: 'toDoLimit' avoiding: locals. "N.B. adds it to locals!!"
+				node arguments: node args , { (TVariableNode new
+						 setName: var;
+						 yourself) }.
+				declarations at: node args third args first ifPresent: [ :decl | 
+					self
+						declarationAt: var
+						put:
+						(self typeFor: node args third args first in: aCodeGen) , ' '
+						, var ] ] ]
 ]
 
 { #category : #inlining }
@@ -985,6 +991,7 @@ TMethod >> extractExpandCaseDirective [
 
 { #category : #transformations }
 TMethod >> extractExportDirective [
+
 	"Scan the top-level statements for an inlining directive of the form:
 
 		self export: <boolean>
@@ -992,10 +999,10 @@ TMethod >> extractExportDirective [
 	 and remove the directive from the method body. Answer the
 	 argument of the directive or false if there is no export directive."
 
-	^self
-		extractDirective: #export:
-		valueBlock: [:sendNode| sendNode args first value ~= false]
-		default: false
+	^ self
+		  extractDirective: #export:
+		  valueBlock: [ :sendNode | sendNode arguments first value ~= false ]
+		  default: false
 ]
 
 { #category : #'inlining support' }
@@ -3158,6 +3165,20 @@ TMethod >> variablesAssignedTo [
 	parseTree nodesDo: [ :node |
 		node isAssignment ifTrue: [ refs add: node variable name ].
 	].
+	^ refs
+]
+
+{ #category : #utilities }
+TMethod >> variablesUpdatedFrom: variablesCollection [
+
+	"Answer a set of variables (contained in variablesCollection) updated in this method."
+
+	| refs |
+	refs := Set new.
+	parseTree nodesDo: [ :node | 
+		(node isAssignment and: [ 
+			 variablesCollection includes: node variable name ]) ifTrue: [ 
+			refs add: node variable name asString ] ].
 	^ refs
 ]
 

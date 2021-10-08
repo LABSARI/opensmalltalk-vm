@@ -3410,23 +3410,21 @@ CCodeGenerator >> inlineDispatchesInMethodNamed: selector [
 	m parseTree bindVariablesIn: replacementDict.
 	"Wrap sends with externalization/internalization statements"
 	sendReplacements := Dictionary new.
-	methodsReferencesToVarsToLocalize := Dictionary new.
 
 	m parseTree
 		nodesDo: [ :node | 
 			(node isSend and: [ self isFunctionCall: node ]) ifTrue: [ 
 				| externalVars |
 				externalVars := self
-					                localizedVariablesReferences: variablesToLocalize
-					                inMethod: node selector
-					                withDictionary: methodsReferencesToVarsToLocalize.
+					                updatedVariablesFrom: variablesToLocalize
+					                inMethod: node selector.
 
-				externalVars ifNotEmpty: [
+				externalVars ifNotEmpty: [ 
 					sendReplacements at: node put: (TExternalSendNode
 							 send: node
 							 variableBindings:
-							 (externalVars collect: [ :var | 
-								  var -> (replacementDict at: var) ]) asDictionary) ] ] ]
+								 (externalVars collect: [ :var | 
+									  var -> (replacementDict at: var) ]) asDictionary) ] ] ]
 		unless: [ :e | e isReturn ].
 	sendReplacements ifNotEmpty: [ 
 		m parseTree replaceNodesIn: sendReplacements ].
@@ -3781,31 +3779,6 @@ CCodeGenerator >> localizeVariables: varsList inMethod: m [
 			variableDeclarations removeKey: varString ] ]
 ]
 
-{ #category : #'automatic-localization' }
-CCodeGenerator >> localizedVariablesReferences: variablesToLocalize inMethod: selector withDictionary: associationDictionary [
-
-	"Return the references to global variables that are in variablesToLocalize in method selector."
-
-	| currentMeth externalCalls globalReferences variablesReferences |
-	associationDictionary at: selector ifPresent: [ :vars | ^ vars ].
-	currentMeth := self methodNamed: selector.
-	externalCalls := currentMeth externalCallsIn: self.
-	globalReferences := currentMeth freeVariableReferences.
-	variablesReferences := (variablesToLocalize select: [ :var | 
-		                        globalReferences includes: var ]) asSet.
-	externalCalls ifEmpty: [ 
-		associationDictionary at: selector put: variablesReferences.
-		^ variablesReferences ].
-
-	externalCalls do: [ :s | 
-		variablesReferences addAll: (self
-				 localizedVariablesReferences: variablesToLocalize
-				 inMethod: s
-				 withDictionary: associationDictionary) ].
-	associationDictionary at: selector put: variablesReferences.
-	^ variablesReferences
-]
-
 { #category : #utilities }
 CCodeGenerator >> logger [
 	^logger
@@ -4025,72 +3998,76 @@ CCodeGenerator >> nilOrBooleanConditionFor: nodeOrNil [
 
 { #category : #utilities }
 CCodeGenerator >> nilOrBooleanConstantReceiverOf: aNode [
+
 	"Answer nil or the boolean constant that is the receiver of the given message send.
 	 Used to suppress conditional code when the condition is a translation-time constant."
 
 	| val receiver argument arms |
-	generateDeadCode ifTrue:[^nil].
-	((self isConstantNode: aNode valueInto: [:v| val := v])
-	 and: [#(true false) includes: val]) ifTrue:
-		[^val].
-	aNode isSend ifTrue:
-		[aNode selector == #not ifTrue:
-			[(self nilOrBooleanConstantReceiverOf: aNode receiver) ifNotNil:
-				[:bool| ^bool not]].
-		 ((#(isNil notNil) includes: aNode selector)
-		  and: [self isNilConstantReceiverOf: aNode]) ifTrue:
-			[^aNode selector == #isNil].
-		 ((#(or: and:) includes: aNode selector)
-		 and: [aNode args last isStmtList
-		 and: [aNode args last statements size = 1]]) ifTrue:
-			[(self nilOrBooleanConstantReceiverOf: aNode receiver) ifNotNil:
-				[:rcvr|
-				((rcvr == false and: [aNode selector == #and:])
-				 or: [rcvr == true and: [aNode selector == #or:]]) ifTrue:
-					[^rcvr].
-				(self nilOrBooleanConstantReceiverOf: aNode args last statements first) ifNotNil:
-					[:arg|
-					^rcvr perform: aNode selector with: [arg]]].
-			 "We can also eliminate expr and: [false], expr or: [true], but only if expr is side-effect free.
+	generateDeadCode ifTrue: [ ^ nil ].
+	((self isConstantNode: aNode valueInto: [ :v | val := v ]) and: [ 
+		 #( true false ) includes: val ]) ifTrue: [ ^ val ].
+	aNode isSend ifTrue: [ 
+		aNode selector == #not ifTrue: [ 
+			(self nilOrBooleanConstantReceiverOf: aNode receiver) ifNotNil: [ 
+				:bool | ^ bool not ] ].
+		((#( isNil notNil ) includes: aNode selector) and: [ 
+			 self isNilConstantReceiverOf: aNode ]) ifTrue: [ 
+			^ aNode selector == #isNil ].
+		((#( or: and: ) includes: aNode selector) and: [ 
+			 aNode args last isStmtList and: [ 
+				 aNode args last statements size = 1 ] ]) ifTrue: [ 
+			(self nilOrBooleanConstantReceiverOf: aNode receiver) ifNotNil: [ 
+				:rcvr | 
+				((rcvr == false and: [ aNode selector == #and: ]) or: [ 
+					 rcvr == true and: [ aNode selector == #or: ] ]) ifTrue: [ 
+					^ rcvr ].
+				(self nilOrBooleanConstantReceiverOf:
+					 aNode args last statements first) ifNotNil: [ :arg | 
+					^ rcvr perform: aNode selector with: [ arg ] ] ].
+			"We can also eliminate expr and: [false], expr or: [true], but only if expr is side-effect free.
 			  This is a weak test; we don't traverse calls.  Caveat emptor!"
-			 ((aNode receiver noneSatisfy: [:node| node isAssignment]) "No side-effects in the elided expression"
-			  and: [aNode args last statements size = 1]) ifTrue:
-				[(self nilOrBooleanConstantReceiverOf: aNode args last statements first) ifNotNil:
-					[:arg|
-					((arg == false and: [aNode selector == #and:])
-					 or: [arg == true and: [aNode selector == #or:]]) ifTrue:
-						[^arg]]]].
+			((aNode receiver noneSatisfy: [ :node | node isAssignment ]) and: [ 
+				 aNode args last statements size = 1 ]) ifTrue: [ 
+				(self nilOrBooleanConstantReceiverOf:
+					 aNode args last statements first) ifNotNil: [ :arg | 
+					((arg == false and: [ aNode selector == #and: ]) or: [ 
+						 arg == true and: [ aNode selector == #or: ] ]) ifTrue: [ ^ arg ] ] ] "No side-effects in the elided expression" ].
 		"Look for Const ifTrue: [self foo] ifFalse: [false] => false"
-		 ((#(ifTrue:ifFalse: ifFalse:ifTrue:) includes: aNode selector)
-		  and: [(self isConstantNode: aNode receiver valueInto: [:v| val := v])
-		  and: [(#(true false) includes: val)
-		  and: [arms := aNode args collect:
-							[:altBlock| | bval |
-							 (altBlock statements size = 1
-							 and: [(self isConstantNode: altBlock statements last valueInto: [:v| bval := v])
-							 and: [#(true false) includes: bval]]) ifTrue:
-								[bval]].
-				arms asArray ~= #(nil nil)]]]) ifTrue:
-			[| arm |
-			 arm := aNode selector == #ifTrue:ifFalse: == val
-						ifTrue: [arms first]
-						ifFalse: [arms last].
-			 (#(true false) includes: arm) ifTrue:
-				[^arm]].
-		 ((#(= ~= < > <= >=) includes: aNode selector)
-		  and: [(self isConstantNode: aNode receiver valueInto: [:v| receiver := v])
-		  and: [receiver isInteger
-		  and: [(self isConstantNode: aNode args first valueInto: [:v| argument := v])
-		  and: [argument isInteger]]]]) ifTrue:
-			[^receiver perform: aNode selector with: argument].
-		 "Inlining for e.g. CharacterTable ifNil: [...] ifNotNil: [...]], which compiles to CharacterTable == nil ifTrue: [...] ifFalse: [...]"
-		(aNode selector == #==
-		 and: [aNode args first isVariable
-		 and: [aNode args first name = 'nil'
-		 and: [aNode receiver isConstant
-		 and: [aNode receiver value == nil]]]]) ifTrue:
-			[^true]].
-	^nil
+		((#( #ifTrue:ifFalse: #ifFalse:ifTrue: ) includes: aNode selector) 
+			 and: [ 
+				 (self isConstantNode: aNode receiver valueInto: [ :v | val := v ]) 
+					 and: [ 
+						 (#( true false ) includes: val) and: [ 
+							 arms := aNode args collect: [ :altBlock | 
+								         | bval |
+								         (altBlock statements size = 1 and: [ 
+									          (self
+										           isConstantNode: altBlock statements last
+										           valueInto: [ :v | bval := v ]) and: [ 
+										          #( true false ) includes: bval ] ]) ifTrue: [ 
+									         bval ] ].
+							 arms asArray ~= #( nil nil ) ] ] ]) ifTrue: [ 
+			| arm |
+			arm := aNode selector == #ifTrue:ifFalse: == val
+				       ifTrue: [ arms first ]
+				       ifFalse: [ arms last ].
+			(#( true false ) includes: arm) ifTrue: [ ^ arm ] ].
+		((#( = ~= < > <= >= ) includes: aNode selector) and: [ 
+			 (self
+				  isConstantNode: aNode receiver
+				  valueInto: [ :v | receiver := v ]) and: [ 
+				 receiver isInteger and: [ 
+					 (self
+						  isConstantNode: aNode args first
+						  valueInto: [ :v | argument := v ]) and: [ argument isInteger ] ] ] ]) 
+			ifTrue: [ ^ receiver perform: aNode selector with: argument ].
+		"Inlining for e.g. CharacterTable ifNil: [...] ifNotNil: [...]], which compiles to CharacterTable == nil ifTrue: [...] ifFalse: [...]"
+		(aNode selector == #== and: [ 
+			 aNode arguments first isVariable and: [ 
+				 aNode arguments first name = 'nil' and: [ 
+					 aNode receiver isConstant and: [ aNode receiver value == nil ] ] ] ]) 
+			ifTrue: [ ^ true ] ].
+	^ nil
 ]
 
 { #category : #'translation support' }
@@ -5183,6 +5160,42 @@ CCodeGenerator >> unusedConstants [
 			 value includesSubstring: const ]) ifTrue: [ 
 			unused remove: const ifAbsent: [  ] ] ].
 	^ unused
+]
+
+{ #category : #'automatic-localization' }
+CCodeGenerator >> updatedVariablesFrom: variablesToLocalize inMethod: selector [
+
+	"Return the references to global variables that are in variablesToLocalize in method selector."
+
+	| associationDictionary |
+	associationDictionary := Dictionary new.
+	^ self
+		  updatedVariablesFrom: variablesToLocalize
+		  inMethod: selector
+		  withDictionary: associationDictionary
+]
+
+{ #category : #'automatic-localization' }
+CCodeGenerator >> updatedVariablesFrom: variablesToLocalize inMethod: selector withDictionary: associationDictionary [
+
+	"Return the references to global variables that are in variablesToLocalize in method selector."
+
+	| currentMeth externalCalls updatedVariables |
+	associationDictionary at: selector ifPresent: [ :vars | ^ vars ].
+	currentMeth := self methodNamed: selector.
+	externalCalls := currentMeth externalCallsIn: self.
+	updatedVariables := currentMeth variablesUpdatedFrom: variablesToLocalize.
+	externalCalls ifEmpty: [ 
+		associationDictionary at: selector put: updatedVariables.
+		^ updatedVariables ].
+
+	externalCalls do: [ :s | 
+		updatedVariables addAll: (self
+				 updatedVariablesFrom: variablesToLocalize
+				 inMethod: s
+				 withDictionary: associationDictionary) ].
+	associationDictionary at: selector put: updatedVariables.
+	^ updatedVariables
 ]
 
 { #category : #accessing }

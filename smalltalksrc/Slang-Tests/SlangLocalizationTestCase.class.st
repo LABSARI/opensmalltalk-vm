@@ -184,6 +184,22 @@ SlangLocalizationTestCase >> testAutoLocalizeVariableWrapsSendsWithExternalSendN
 ]
 
 { #category : #tests }
+SlangLocalizationTestCase >> testExternalCallReadingOnlyVariableShouldNotEscapeCall [
+	
+	| interpretMethod |
+	MockLocalizationInterpreterMock.
+	ccg addClass: MockLocalizationInterpreterMock.
+	
+	"Prepare methods will replace the bytecode dispatch instruction into a dispatch switch"
+	ccg prepareMethods.
+	ccg inlineDispatchesInMethodNamed: #interpretWithExternalCallBeforeDispatch.
+
+	interpretMethod := ccg methodNamed: #interpretWithExternalCallBeforeDispatch.
+	self assert: interpretMethod statements second isSend.
+	self assert: interpretMethod statements second selector equals: #nonInlinedMethodUsingAutolocalizedVariable
+]
+
+{ #category : #tests }
 SlangLocalizationTestCase >> testExternalEscapingSendNodeShouldBeTranslatedWithExternalizationAndInternalization [
 	
 	| interpretMethod case inlinedMethod externalCall cast printedString |
@@ -213,21 +229,6 @@ SlangLocalizationTestCase >> testExternalEscapingSendNodeShouldBeTranslatedWithE
 		local_autoLocalizedVariable = autoLocalizedVariable;
 	}
 }'
-]
-
-{ #category : #tests }
-SlangLocalizationTestCase >> testExternalEscapingSendNodeShouldBeTranslatedWithExternalizationAndInternalizationOutOfDispatch [
-	
-	| interpretMethod |
-	MockLocalizationInterpreterMock.
-	ccg addClass: MockLocalizationInterpreterMock.
-	
-	"Prepare methods will replace the bytecode dispatch instruction into a dispatch switch"
-	ccg prepareMethods.
-	ccg inlineDispatchesInMethodNamed: #interpretWithExternalCallBeforeDispatch.
-
-	interpretMethod := ccg methodNamed: #interpretWithExternalCallBeforeDispatch.
-	self assert: interpretMethod statements second statements first isExternalSend
 ]
 
 { #category : #tests }
